@@ -41,7 +41,7 @@ int main(void)
 		_delay_ms(500);	// Here the CPU will wait for 500ms
 
 		// Now turn off the LED by writing the bit "0" to PORTB 6th bit (PORTB5)
-		PORTB &= ~(1 << PORTB5);	// 1 << PORTB5 = 00000000 -> 00100000; ~(1 << PORTB5) = 00100000 -> 11011111; PORTB5 &= ~(1 << PORTB5) = ??1????? & 11011111 -> ??0?????
+		PORTB &= ~(1 << PORTB5);	// 1 << PORTB5 = 00000001 -> 00100000; ~(1 << PORTB5) = 00100000 -> 11011111; PORTB5 &= ~(1 << PORTB5) = ??1????? & 11011111 -> ??0?????
 		// PORTB &= ~(0b00100000);
 		// PORTB &= 0b11011111;		
 		// The PORTB |= 0 << PORTB5 will not work. Do you know why?

@@ -105,7 +105,7 @@ Disassembly of section .text:
 		_delay_ms(500);	// Here the CPU will wait for 500ms
 
 		// Now turn off the LED by writing the bit "0" to PORTB 6th bit (PORTB5)
-		PORTB &= ~(1 << PORTB5);	// 1 << PORTB5 = 00000000 -> 00100000; ~(1 << PORTB5) = 00100000 -> 11011111; PORTB5 &= ~(1 << PORTB5) = ??1????? & 11011111 -> ??0?????
+		PORTB &= ~(1 << PORTB5);	// 1 << PORTB5 = 00000001 -> 00100000; ~(1 << PORTB5) = 00100000 -> 11011111; PORTB5 &= ~(1 << PORTB5) = ??1????? & 11011111 -> ??0?????
   9a:	2d 98       	cbi	0x05, 5	; 5
   9c:	2f ef       	ldi	r18, 0xFF	; 255
   9e:	89 e6       	ldi	r24, 0x69	; 105
