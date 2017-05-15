@@ -39,13 +39,13 @@ int main(void)
 			TIFR0 |= 1 << TOV0;
 			
 			//  - check the counter variable
-			//	- if it is smaller than the maximal value, than increment it!
+			//  - if it is smaller than the maximal value, than increment it!
 			
 			if (cntr < cntr_max) {
 				cntr++;
 			}
 			
-			//	- else set it to 0, and toggle the LED
+			//  - else set it to 0, and toggle the LED
 			else {
 				cntr = 0;
 				PINB |= 1 << PINB5;

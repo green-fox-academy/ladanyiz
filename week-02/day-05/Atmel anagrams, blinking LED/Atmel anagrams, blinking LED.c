@@ -28,6 +28,9 @@ void UART_Init()
 	//TODO:
 	// Enable RX
 	UCSR0B |= 1 << RXEN0;
+	
+	//set PB5 as output
+	DDRB |= 1<<DDRB5;
 
 }
 
@@ -92,6 +95,26 @@ int is_anagram(char one[], char two[]){
 	return anagram;
 }
 
+void blink_once(){
+	PORTB |= 1<<PORTB5;
+	_delay_ms(500);
+	PORTB &= ~(1<<PORTB5);
+}
+
+void blink_twice(){
+	/*PORTB |= 1<<PORTB5;
+	_delay_ms(250);
+	PORTB &= ~(1<<PORTB5);
+	_delay_ms(250);
+	PORTB |= 1<<PORTB5;
+	_delay_ms(250);
+	PORTB &= ~(1<<PORTB5);*/
+	for (uint8_t i = 0; i < 4; i++){
+		PINB |= 1<<PINB5;
+		_delay_ms(250);
+	}
+}
+
 int main(void)
 {
 	//Don't forget to call the init function :)
@@ -119,12 +142,15 @@ int main(void)
 		printf("%s\r\n", second);
 		if (strlen(first) != strlen(second)){
 			printf("They are not the same length, so obviously not!\r\n");
+			blink_twice();
 		}
 		else if (is_anagram(first, second) == 1){
 			printf("Yes, they are!\r\n");
+			blink_once();
 		}
 		else {
 			printf("No :(\r\n");
+			blink_twice();
 		}
 	}
 }
