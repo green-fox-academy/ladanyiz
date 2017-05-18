@@ -23,7 +23,7 @@ int main(void) {
     SystemInit();
 
     // DAC test data
-    // gain = 2, data is 0xFFF so the output voltage should be 4.048V
+    // gain = 2x, data is 0xFFF so the output voltage should be 4.048V
     MCP4821_Data_t DAC_data;
     DAC_data.start_zero = 0;
     DAC_data.dont_care = 0;

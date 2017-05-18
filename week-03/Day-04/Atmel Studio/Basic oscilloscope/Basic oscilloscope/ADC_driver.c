@@ -28,7 +28,7 @@ uint16_t ADC_Read() {
     // TODO:
     // Start a conversion with ADSC bit setup
 	ADCSRA |= 1 << ADSC;
-	// PRADC &= ~(1 << PRR); // Data Sheet mentions this...
+	// PRADC &= ~(1 << PRR); // the data sheet mentions this...
 
     // TODO:
     // Wait for the conversion to finish by checking ADSC bit
