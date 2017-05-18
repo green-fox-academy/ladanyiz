@@ -1,7 +1,7 @@
 /*
- * ADC.c
+ * DC function generator.c
  *
- * Created: 2017. 05. 18. 14:54:18
+ * Created: 2017. 05. 18. 17:13:22
  * Author : Z
  */ 
 
@@ -29,7 +29,7 @@ void SystemInit() {
 	// Set the LED to off as deafault
 	LED_PORT &= ~(1 << LED_PORT_POS);
 
-	// Call the DAC driver init function
+	// Call the ADC driver init function
 	ADC_Init();
 
 	// Call the UART driver init function

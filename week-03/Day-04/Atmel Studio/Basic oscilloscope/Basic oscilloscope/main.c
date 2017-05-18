@@ -1,7 +1,7 @@
 /*
- * ADC.c
+ * Basic oscilloscope.c
  *
- * Created: 2017. 05. 18. 14:54:18
+ * Created: 2017. 05. 18. 16:32:13
  * Author : Z
  */ 
 
