@@ -1,15 +1,17 @@
 /*
- * Basic oscilloscope.c
+ * DC function generator.c
  *
- * Created: 2017. 05. 18. 16:32:13
+ * Created: 2017. 05. 18. 17:13:22
  * Author : Z
  */ 
 
 #include "ADC_driver.h"
 #include "UART_driver.h"
+#include "MCP4821_driver.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef F_CPU
 #define F_CPU 16000000UL
@@ -26,23 +28,26 @@
 void SystemInit() {
 	// Initialize the LED pin as output
 	LED_DDR |= 1 << LED_DDR_POS;
-	// Set the LED to off as deafault
+	// Set the LED to off as default
 	LED_PORT &= ~(1 << LED_PORT_POS);
 
-	// Call the DAC driver init function
+	// Call the ADC driver init function
 	ADC_Init();
 
 	// Call the UART driver init function
 	// Keep in mind that the UART will run at 115200 baud/sec
 	UART_Init();
+	
+	MCP4821_Init();
 
 	// Enable interrupts globally, UART uses interrupts
 	sei();
 }
 
 int main(void) {
+	
 	uint16_t adc_data;
-
+	
 	// Don't forget to call the init function :)
 	SystemInit();
 
@@ -54,14 +59,42 @@ int main(void) {
 	FILE UART_input = FDEV_SETUP_STREAM(NULL, UART_GetCharacter, _FDEV_SETUP_READ);
 	stdin = &UART_input;
 	//----- END OF STDIO IO BUFFER SETUP
-
-	// Try printf
-	printf("Startup...\r\n");
-
-	// Infinite loop
-	while (1) {
-		// ADC tester code
-		adc_data = ADC_Read();
-		UART_SendCharacter(adc_data >> 2); // = adc_data / 4, because adc_data is 10 bits
+	
+	char temp[8];
+	
+	printf("\nD C   F U N C T I O N   G E N E R A T O R\n\n");
+	printf("What voltage shall I generate? Enter a number, preferably between 0 and 4.096: ");
+	gets(temp);
+	
+	double volt = atof(temp);
+	
+	if(volt < 0) {
+		volt = 0;
+	} else if(volt > 4.096) {
+		volt = 4.096;
 	}
+	
+	int16_t data = volt * 4095 / 4.095;
+	
+	// Test
+	printf("\nData: %d", data);
+	
+	// DAC data
+	// gain = 2x, data is 'data'
+	MCP4821_Data_t DAC_data;
+	DAC_data.start_zero = 0;
+	DAC_data.dont_care = 0;
+	DAC_data.gain = 0;
+	DAC_data.shutdown = 1;
+	DAC_data.data = data;
+
+	// Send the data structure
+	MCP4821_SendData(&DAC_data);
+	
+	// ADC tester code
+	while(1) {
+		adc_data = ADC_Read();
+		UART_SendCharacter(adc_data >> 2);
+	}
+	
 }

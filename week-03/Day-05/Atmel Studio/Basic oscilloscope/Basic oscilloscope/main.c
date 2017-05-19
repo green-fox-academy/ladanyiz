@@ -1,7 +1,7 @@
 /*
- * DC function generator.c
+ * Basic oscilloscope.c
  *
- * Created: 2017. 05. 18. 17:13:22
+ * Created: 2017. 05. 18. 16:32:13
  * Author : Z
  */ 
 
@@ -29,7 +29,7 @@ void SystemInit() {
 	// Set the LED to off as deafault
 	LED_PORT &= ~(1 << LED_PORT_POS);
 
-	// Call the ADC driver init function
+	// Call the DAC driver init function
 	ADC_Init();
 
 	// Call the UART driver init function
@@ -41,6 +41,7 @@ void SystemInit() {
 }
 
 int main(void) {
+	
 	uint16_t adc_data;
 
 	// Don't forget to call the init function :)
