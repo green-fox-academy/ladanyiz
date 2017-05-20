@@ -5,8 +5,8 @@ int main() {
     int number = 1234;
     //TODO:
     // print the memory address of the variable
-    int *ptr_number = &number;
-    printf("The memory address of the 'number' variable is %d", ptr_number);
+    int* pNumber = &number;
+    printf("The memory address of the 'number' variable is %d", pNumber);
 
     return 0;
 }

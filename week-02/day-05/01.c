@@ -2,39 +2,38 @@
 #include <stdint.h>
 #include <string.h>
 
-int is_anagram(char one[], char two[]){
+int is_anagram(char one[], char two[]) {
 
-    uint8_t size_one = strlen(one);
-    uint8_t size_two = strlen(two);
+    uint8_t size = strlen(one); // or strlen(two), since they are equal
     uint8_t tmp;
-    uint8_t n;
     uint8_t anagram = 1;
+    uint8_t i;
+    uint8_t j;
 
-	for (uint8_t i = size_one-1; i > 0; i--)
-		for (uint8_t j = 0; j < i; j++)
-			if(one[j] > one[j+1])
+	for (i = size - 1; i > 0; i--)
+		for (j = 0; j < i; j++)
+			if (one[j] > one[j+1])
 			{
 				tmp = one[j];
 				one[j] = one[j+1];
 				one[j+1] = tmp;
 			}
 
-	for (uint8_t i = size_two-1; i > 0; i--)
-		for (uint8_t j = 0; j < i; j++)
-			if(two[j] > two[j+1])
+	for (i = size - 1; i > 0; i--)
+		for (j = 0; j < i; j++)
+			if (two[j] > two[j+1])
 			{
 				tmp = two[j];
 				two[j] = two[j+1];
 				two[j+1] = tmp;
 			}
-    
-    n = 0;
-    do {
-        if (one[n] != two[n]) {
+
+    while (i<size && anagram==1) {
+        if (one[i] != two[i]) {
             anagram = 0;
         }
-        n++;
-    } while (n<size_one && anagram==1);
+        i++;
+    }
 
     return anagram;
 }
@@ -51,11 +50,9 @@ int main() {
     gets(second);
     if (strlen(first) != strlen(second)){
         printf("They are not the same length, so obviously not!\n");
-    }
-    else if (is_anagram(first, second) == 1){
+    } else if (is_anagram(first, second)) {
         printf("Yes, they are!\n");
-    }
-    else {
+    } else {
         printf("No :(\n");
     }
     return 0;

@@ -8,11 +8,9 @@ int main() {
 	// if more than 20 print 'Less!'
 	if (z < 10) {
         printf("More!\n");
-	}
-	else if (z > 20) {
+	} else if (z > 20) {
         printf("Less!\n");
-	}
-	else {
+	} else {
         printf("Sweet!\n");
 	}
 	return 0;

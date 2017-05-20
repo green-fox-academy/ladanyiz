@@ -14,23 +14,22 @@ int Fibonacci(int x) {
         return 1;
     }
 
-    int n;
     int result = 0;
     int prev_result = 1;
     int prev_prev_result = 1;
 
-    for (n = 2; n < x; n++) {
+    for (int n = 2; n < x; n++) {
         result = prev_prev_result + prev_result;
         prev_prev_result = prev_result;
         prev_result = result;
     }
 
-return result;
+    return result;
 }
 
 int main(){
 
     printf("%d\n", Fibonacci(6));
 
-return 0;
+    return 0;
 }

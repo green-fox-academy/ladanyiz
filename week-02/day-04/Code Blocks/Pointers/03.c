@@ -3,11 +3,11 @@
 
 int main() {
     int number = 1234;
-    int* number_pointer = &number;
+    int* pNumber = &number;
     //TODO:
     // update the value of number variable to 42 using the "number_pointer"
-    *number_pointer = 42;
-    printf("The new number is %d\n", *number_pointer);
+    *pNumber = 42;
+    printf("The new number is %d\n", *pNumber);
 
     return 0;
 }

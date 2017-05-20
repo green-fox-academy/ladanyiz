@@ -3,12 +3,12 @@
 
 int main() {
     int numbers[] = {5, 6, 7, 8, 9};
-    int* number_pointer;
+    int* pNumbers;
     //TODO:
     // The "number_pointer" should point to the first element of the array called "numbers",
     // than please print its value with it.
-    number_pointer = numbers;
-    printf("The first element is %d\n", *number_pointer);
+    pNumbers = numbers; // = &numbers[0]
+    printf("The first element is %d\n", *pNumbers);
 
     return 0;
 }

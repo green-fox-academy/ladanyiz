@@ -20,5 +20,5 @@ int main(){
 
     TotoroLogoPrinter();
 
-return 0;
+    return 0;
 }

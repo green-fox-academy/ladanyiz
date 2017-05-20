@@ -3,9 +3,9 @@
 
 int main() {
     int number = 1234;
-    int* number_pointer = &number;
+    int* pNumber = &number;
     //TODO:
     // print the value of number using the "number_pointer"
-    printf("The number is %d\n", *number_pointer);
+    printf("The number is %d\n", *pNumber);
     return 0;
 }

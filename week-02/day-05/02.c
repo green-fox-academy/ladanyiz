@@ -2,13 +2,13 @@
 #include <stdint.h>
 #include <string.h>
 
-char* create_palindrome(char word[]){
+char* create_palindrome(char word[60]) {
 
     uint8_t len = strlen(word);
     char temp[len];
 
     for (int8_t i = len-1; i > -1; i--){
-        temp[len-1-i] = word[i];
+        temp[len -1 -i] = word[i];
     }
     strcat(word, temp);
     return word;
@@ -16,11 +16,13 @@ char* create_palindrome(char word[]){
 
 int main() {
 
-    char input[40];
+    char input[30];
 
-    printf("Give me a word: ");
-    gets(input);
-    printf("Its palindrome is %s\n", create_palindrome(input));
+    while (1) {
+        printf("Give me a word: ");
+        gets(input);
+        printf("Its palindrome is %s\n", create_palindrome(input));
+    }
 
     return 0;
 }

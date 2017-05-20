@@ -5,8 +5,7 @@ int main() {
 	// tell if it has 11 as a divisor
 	if (i%11 == 0){
         printf("%d is divisible by 11", i);
-	}
-	else {
+	} else {
         printf("%d is not divisible by 11", i);
 	}
 	return 0;

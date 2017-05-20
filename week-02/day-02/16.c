@@ -3,7 +3,7 @@
 
 int main() {
 	uint16_t v = 426;
-	// print 'Yeah!' if dividable by 4 but print 'End of program' after regardless
+	// print 'Yeah!' if divisible by 4 but print 'End of program' after regardless
 	if (v % 4 == 0) {
         printf("Yeah!\n");
 	}

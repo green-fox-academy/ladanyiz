@@ -7,9 +7,9 @@ int main() {
 	uint8_t is_bonus = 0;	// This means "false"
 	// if credits are at least 50,
 	// and is_bonus is false decrement ab by 2
-	if (is_bonus==0) {
+	if (is_bonus == 0) {
         if (credits >= 50) {
-            printf("%d\n", ab-=2);
+            printf("%d\n", ab -= 2);
         }
 	// if credits are smaller than 50,
 	// and is_bonus is false decrement ab by 1

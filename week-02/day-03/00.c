@@ -11,6 +11,8 @@ int FruitManipulator(int oranges, int apples, unsigned int what_to_do){
 }
 
 int main() {
+
     printf("%d\n", FruitManipulator(-3, 5, 1));
-return 0;
+
+    return 0;
 }

@@ -16,11 +16,10 @@ int main() {
 
     //TODO:
     // Get the user's pet name with getch
-    int c;
     int i = 0;
     printf("What is your name?: ") ;
     do {
-        c = getchar();
+        int c = getchar();
         buffer[i] = c;
         i++;
     } while (c != '\n');

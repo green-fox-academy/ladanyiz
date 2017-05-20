@@ -2,11 +2,10 @@
 
 int main() {
 	int k = 1521;
-	// tell if k is dividable by 3 or 5
-	if (k%3 == 0 || k%5 == 0){
+	// tell if k is divisible by 3 or 5
+	if ((k%3 == 0) || (k%5 == 0)){
         printf("%d is divisible by either 3 or 5", k);
-	}
-	else {
+	} else {
         printf("%d is not divisible by 3 or 5", k);
 	}
 	return 0;

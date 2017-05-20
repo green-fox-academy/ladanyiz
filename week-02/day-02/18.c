@@ -7,8 +7,7 @@ int main() {
 	// print 'longer than 8bits' otherwise print 'ok'
 	if (number > 255) {
         printf("Longer than 8 bits\n");
-	}
-	else {
+	} else {
         printf("OK\n");
 	}
 	return 0;

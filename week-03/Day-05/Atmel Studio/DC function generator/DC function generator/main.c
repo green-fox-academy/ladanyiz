@@ -46,8 +46,17 @@ void SystemInit() {
 
 int main(void) {
 	
+	char temp[8];
 	uint16_t adc_data;
-	
+
+	// initialize DAC data
+	MCP4821_Data_t DAC_data;
+	DAC_data.start_zero = 0;
+	DAC_data.dont_care = 0;
+	DAC_data.gain = 0;	// gain = 2x
+	DAC_data.shutdown = 1; // do not shutdown
+	DAC_data.data = 0;
+
 	// Don't forget to call the init function :)
 	SystemInit();
 
@@ -60,40 +69,35 @@ int main(void) {
 	stdin = &UART_input;
 	//----- END OF STDIO IO BUFFER SETUP
 	
-	char temp[8];
-	
 	printf("\nD C   F U N C T I O N   G E N E R A T O R\n\n");
 	printf("What voltage shall I generate? Enter a number, preferably between 0 and 4.096: ");
-	gets(temp);
-	
-	double volt = atof(temp);
-	
-	if(volt < 0) {
-		volt = 0;
-	} else if(volt > 4.096) {
-		volt = 4.096;
-	}
-	
-	int16_t data = volt * 4095 / 4.095;
-	
-	// Test
-	printf("\nData: %d", data);
-	
-	// DAC data
-	// gain = 2x, data is 'data'
-	MCP4821_Data_t DAC_data;
-	DAC_data.start_zero = 0;
-	DAC_data.dont_care = 0;
-	DAC_data.gain = 0;
-	DAC_data.shutdown = 1;
-	DAC_data.data = data;
 
-	// Send the data structure
-	MCP4821_SendData(&DAC_data);
 	
-	// ADC tester code
 	while(1) {
+		
+		if (rx_buffer.read_ptr != rx_buffer.write_ptr) {
+						
+			gets(temp);	
+			
+			double volt = atof(temp);
+				
+			if(volt < 0) {
+				volt = 0;
+			} else if(volt > 4.096) {
+				volt = 4.096;
+			}
+	
+			DAC_data.data = (int16_t)volt * 4095 / 4.095;
+	
+			// Test
+			// printf("\nData: %d", DAC_data.data);	
+
+			// Send the data structure
+			MCP4821_SendData(&DAC_data);		
+		}
+		
 		adc_data = ADC_Read();
+
 		UART_SendCharacter(adc_data >> 2);
 	}
 	

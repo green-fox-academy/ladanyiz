@@ -2,22 +2,32 @@
 #include <stdint.h>
 #include <string.h>
 
-void safeUnion(int *a, int l_a, int *b, int l_b, int *result, int l_res) {
+void safeUnion(int* a, int l_a, int* b, int l_b, int* result, int l_res) {
     //TODO:
     // Implement this function to create the union of a and b into the array result!
-    memcpy(result, a, l_a);
-    memcpy(result + l_a, b, l_b);
-
+    int i;
+    for (i = 0; i < l_a; i++) {
+        result[i] = a[i];
+    }
+    for (int j = 0; j < l_b; j++ ) {
+        result[i + j] = b[j];
+    }
     return;
 }
 
-int main(int argc, char** argv) {
+int main() {
+
     int a[3] = {1,2,3};
     int b[3] = {4,5,6};
     int c[6];
+
     safeUnion(a,3,b,3,c,6);
+
     for (int i = 0; i<6; i++) {
-        printf("%d\n", c[i]);
+        printf("%d\t", c[i]);
     }
+
+    printf("\n");
+
     return 0;
 }

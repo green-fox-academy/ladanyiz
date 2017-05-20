@@ -21,7 +21,7 @@ int main() {
 	}
 	// otherwise set out to 0b001
 	else {
-            printf("out is 0b001, decimal %d\n", out = 0b001);
+        printf("out is 0b001, decimal %d\n", out = 0b001);
 	}
 	return 0;
 }
