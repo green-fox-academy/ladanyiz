@@ -10,7 +10,7 @@ int main() {
     uint8_t guess;
     char answer;
 
-    printf("GUESS MY NUMBER!\n") ;
+    printf("GUESS MY NUMBER!\n");
 
     do {
         printf("I will think of a number between 1 and 'max'\n");

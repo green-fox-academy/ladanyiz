@@ -19,11 +19,11 @@ struct House {
 // The market price of the houses is 400 EUR / square meters
 // Create a function that takes a pointer to a house and decides if it's worth to buy
 // (if the price is lower than the calculated price from it's area)
-int IsItWorthIt(struct House _house) {
+int IsItWorthIt(struct House* _house) {
 
     int worth_it = 0;
 
-    if (_house.price / _house.area <= 400) {
+    if (_house->price / _house->area <= 400) {
         worth_it = 1;
     }
 
@@ -37,7 +37,7 @@ int HowManyIsWorthIt(struct House* _houses, int size) {
 
     int num = 0;
     for (int i = 0; i < size; i++) {
-        if (IsItWorthIt(_houses[i]) == 1) {
+        if (IsItWorthIt(&_houses[i])) {
             num++;
         }
     }

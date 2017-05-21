@@ -1,10 +1,7 @@
-
-//NOT READY!!!
-
+// TODO: Include needed header files
 #include <stdio.h>
 #include "another_file.h"
 
-// TODO: Include needed header files
 
 int main() {
     // Set the default state of the variable

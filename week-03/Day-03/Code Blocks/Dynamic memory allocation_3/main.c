@@ -19,21 +19,52 @@
  *
  * It should delete any dynamically allocated resource before the program exits.
  */
+
+uint8_t i;
+
 int* range(int from, int to, int step) {
+
     int size = (to - from) / step;
+    if (((to - from) % step) != 0) {
+        size++;
+    }
+
+    // test
+    printf("%d\n", size);
+
     int* ptr = calloc(size, sizeof(int));
-    for (uint8_t i = 0; i < size; i++) {
+
+    // test
+    printf("%d\n", sizeof(ptr));
+
+    for (i = 0; i < size; i++) {
         ptr[i] = from + step*i;
     }
+
     return ptr;
-    free(ptr);
 }
 
 int main() {
 
-    for (uint8_t i = 0; i < sizeof(*range(0, 10, 2))/sizeof(int); i++) {
-        printf("%d, ", range(0, 10, 2)[i]);
-    }
+    int* array1 = range(0, 20, 4);
 
-  return 0;
+    // test
+    printf("%d\n", sizeof(array1));
+
+    for (i = 0; i < sizeof(array1); i++) {
+        printf("%d\t", array1[i]);
+    }
+    printf("\n");
+/*
+    int* array2 = range(1, -8, 3);
+
+    for (i = 0; i < sizeof(array2); i++) {
+        printf("%d\t", array2[i]);
+    }
+    printf("\n");
+*/
+    free(array1);
+    //free(array2);
+
+    return 0;
 }

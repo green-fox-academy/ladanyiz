@@ -8,6 +8,7 @@
 #include "ADC_driver.h"
 #include "UART_driver.h"
 #include "MCP4821_driver.h"
+#include "sine_gen.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
@@ -26,34 +27,7 @@
 #define LED_PORT		PORTB
 #define LED_PORT_POS	PORTB5
 
-volatile uint8_t cntr;
-const uint8_t cntr_max = 32;
-float pi = M_PI;
-
-ISR(TIMER0_COMPA_vect) {
-	if (cntr < cntr_max) {
-		cntr++;
-	} else {
-		cntr = 0;
-		// PINB |= 1 << PINB5;
-	}
-}
-
-void Timer_init() {
-    // Clock init
-    // TCCR0B |= 0b00000101;
-    // TCCR0B |= 0x05;
-    TCCR0B |= 1 << CS02;
-    TCCR0B &= ~(1 << CS01);
-    TCCR0B |= 1 << CS00;
-
-    // Set OC register to a default value
-    TCCR0A |= 1 << WGM01;
-    OCR0A = 255;
-
-    // Enable OCR0A interrupt
-    TIMSK0 |= 1 << OCIE0A;
-}
+volatile uint8_t cntr = 0;
 
 void SystemInit() {
 	// Initialize the LED pin as output
@@ -69,6 +43,8 @@ void SystemInit() {
 	UART_Init();
 	
 	MCP4821_Init();
+	
+	SineGenInit();
 
 	// Enable interrupts globally, UART uses interrupts
 	sei();
@@ -94,39 +70,18 @@ int main(void) {
 	
 	printf("\nFIXED FREQUENCY SINE WAVE FUNCTION GENERATOR\n\n");
 	printf("Give me the range of the sine wave between 0 and 4.096: ");
-	gets(temp);
 	
-	double ampl = atof(temp) / 2;
-	
-	if (ampl < 0) {
-		ampl = 0;
-		} else if (ampl > 2.048) {
-		ampl = 2.048;
-	}
-	
-	/*
-	x = 2*pi / 30		y = sin(x) * ampl + 2
-	x = 2*pi / 29		y = sin(x) * ampl + 2
-	for (n = 30; n > 0; n--) {
-		x = 2*pi / n;
-		y = sin(x) * ampl + 2;
-	}
-	*/
-	
-	// DAC data
-	// gain = 2x, data is 'data'
-	MCP4821_Data_t DAC_data;
-	DAC_data.start_zero = 0;
-	DAC_data.dont_care = 0;
-	DAC_data.gain = 0;
-	DAC_data.shutdown = 1;
-	DAC_data.data = y;
-
-	// Send the data structure
-	MCP4821_SendData(&DAC_data);
-	
-	// ADC tester code
 	while (1) {
+		gets(temp);
+	
+		ampl = atof(temp) / 2;
+	
+		if (ampl < 0) {
+			ampl = 0;
+		} else if (ampl > 2.048) {
+			ampl = 2.048;
+		}
+	
 		adc_data = ADC_Read();
 		UART_SendCharacter(adc_data >> 2);
 	}

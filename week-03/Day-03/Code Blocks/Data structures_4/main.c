@@ -33,19 +33,17 @@ float Average(struct Pirate* _pirates, int size) {
 // richest that has wooden leg
 char* RichestWoodenLegged(struct Pirate* _pirates, int size) {
 
-    char nam[] = "q w e r t z u i o p a s d f g h j k l y x c v b n m 0 1 2 3 4 5 6 7 8 9 q w e r t z u i o p a s d f g h j k l y x c v b n m 1 2 3 4 5 6 7 8 9 0";
     int gld = 0;
+    int index = 0;
 
     for (int i = 0; i < size; i++){
-        if (_pirates[i].has_wooden_leg == 1) {
-            if (_pirates[i].gold_count > gld) {
-                gld = _pirates[i].gold_count;
-                strcpy(nam, _pirates[i].name);
-            }
+        if (_pirates[i].has_wooden_leg==1 && _pirates[i].gold_count>gld) {
+            index = i;
+            gld = _pirates[i].gold_count;
         }
     }
 
-    return nam;
+    return _pirates[index].name;
 }
 
 int main() {

@@ -7,9 +7,9 @@
 int main()
 {
     // If TOTORO is not defined throw a preprocessor error
-    #ifndef TOTORO
-        #error "TOTORO not defined!"
-    #endif // TOTORO
+#ifndef TOTORO
+    #error "TOTORO not defined!"
+#endif // TOTORO
     printf("Class members: %d", TOTORO);
     return 0;
 }

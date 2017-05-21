@@ -71,3 +71,4 @@ void MCP4821_SendData(MCP4821_Data_t* data) {
     memcpy(&buffer, data, sizeof(MCP4821_Data_t));
     MCP4821_SendRawData(buffer);
 }
+

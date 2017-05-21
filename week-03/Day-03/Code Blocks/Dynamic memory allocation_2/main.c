@@ -23,7 +23,10 @@ int main() {
         scanf("%f", &array[i]);
         sum += array[i];
     }
+
     printf("The average of these numbers is %.2f\n", sum / count);
+
     free(array);
+
     return 0;
 }
