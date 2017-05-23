@@ -1,0 +1,37 @@
+#include <stdio.h>
+
+struct rectangular_cuboid {
+    double a;
+    double b;
+    double c;
+};
+
+// TODO:
+// Write a function called "GetSurface" that takes a RectangularCuboid
+// and returns it's surface
+int GetSurface(struct rectangular_cuboid brick)
+{
+    double surface = (brick.a * brick.b * 2 + brick.a * brick.c * 2 + brick.b * brick.c * 2);
+
+    return surface;
+}
+
+// TODO:
+// Write a function called "GetVolume" that takes a RectangularCuboid
+// and returns it's volume
+double GetVolume(struct rectangular_cuboid brick)
+{
+    double volume = brick.a * brick.b * brick.c;
+
+    return volume;
+}
+
+int main()
+{
+    struct rectangular_cuboid brick = {10, 20, 30};
+
+    printf("Surface: %.2f\n", GetSurface(brick));
+    printf("Volume: %.2f\n", GetVolume(brick));
+
+    return 0;
+}
