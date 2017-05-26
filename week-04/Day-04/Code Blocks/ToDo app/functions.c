@@ -152,15 +152,13 @@ int remove_task(list_t *list, int index)
 
     free(list->array);
     list->array = new_array;
-    list->size -= 1;
+    list->size--;
 
     return 0;
 }
 
 
-int check_task(list_t *list, int index)
+void check_task(list_t *list, int index)
 {
     list->array[index].checked = 1;
-
-    return 0;
 }

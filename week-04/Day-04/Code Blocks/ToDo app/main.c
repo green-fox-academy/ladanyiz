@@ -6,6 +6,7 @@
 
 int main()
 {
+    // Create and initialize the list of task structures
     list_t my_list;
     init_list(&my_list);
 
@@ -15,26 +16,65 @@ int main()
 
     while (1) {
         gets(command);
+
+        // test
+        printf("\nMAX_COMMAND_LENGTH : \t\t\t%d\n", MAX_COMMAND_LENGTH);
+        printf("length of command string : \t\t%d\n", strlen(command));
+        printf("command string printed:\n");
+        puts(command);
+
+        /* Copy the input to another string so that it remains intact for possible future use,
+           because using strtok() on the input string modifies it.
+           strncpy() is better for error handling. */
         char com_to_parse[MAX_COMMAND_LENGTH];
-        char com_to_parse2[MAX_COMMAND_LENGTH];
+        char com_to_parse2[MAX_COMMAND_LENGTH]; // to be used later
+
         strcpy(com_to_parse, command);
-        strcpy(com_to_parse2, command);
+        //strncpy(com_to_parse, command, MAX_COMMAND_LENGTH-1);
+        //com_to_parse[MAX_COMMAND_LENGTH-1] = 0;
+
+        // test
+        printf("\nlength of com_to_parse after strncpy: \t%d\n", strlen(com_to_parse));
+        printf("com_to_parse string printed:\n");
+        puts(com_to_parse);
 
         char *ptr;
+
+        // Cut out the string until the first space, which gives you the command without parameters
         ptr = strtok(com_to_parse, " ");
 
-        if (strstr(ptr, "x")) {              // exit
+        if (strstr(ptr, "x")) {             // exit
             break;
 
-        } else if (strstr(ptr, "s")) {
+        } else if (strstr(ptr, "s")) {      // start screen
             clrscr();
             start_screen();
 
         } else if (strstr(ptr, "-a")) {     // add
+
+            // Copy the original command to yet another string so that it can be re-used
+            strcpy(com_to_parse2, command);
+            //strncpy(com_to_parse2, command, MAX_COMMAND_LENGTH-1);
+            //com_to_parse2[MAX_COMMAND_LENGTH-1] = 0;
+
+            // test
+            printf("\nlength of com_to_parse2 after strncpy: \t%d\n", strlen(com_to_parse));
+            printf("com_to_parse2 string printed:\n");
+            puts(com_to_parse);
+
+            // Cut the part until the parameter, then cut the parameter itself
             ptr = strtok(com_to_parse2, "\"");
             ptr = strtok(NULL, "\"");
+
+            // test
+            printf("\nlength of parameter after strncpy: \t%d\n", strlen(ptr));
+            printf("parameter string printed:\n");
+            puts(ptr);
+
+            // Handling no parameter error
             if (ptr == NULL) {
-                printf("Unable to add, use \" \" to add a task.\n");
+                printf("\n\nUnable to add, use \" \" to add a task.\n");
+
             } else {
                 char todo[MAX_TODO_LENGTH];
                 strcpy(todo, ptr);
@@ -45,16 +85,38 @@ int main()
             list_tasks(&my_list);
 
         } else if (strstr(ptr, "-wr")) {    // write
+            // Copy the original command to yet another string so that it can be re-used
+            strcpy(com_to_parse2, command);
+
+            // Cut the part until the parameter, then cut the parameter itself
+            ptr = strtok(com_to_parse2, "\"");
             ptr = strtok(NULL, "\"");
-            char path[50];
-            strcpy(path, ptr);
-            write_list(&my_list, path);
+
+            // Handling no parameter error
+            if (ptr == NULL) {
+                printf("Unable to write to file, use \" \" to provide a path.\n");
+            } else {
+                char path[255];
+                strcpy(path, ptr);
+                write_list(&my_list, path);
+            }
 
         } else if (strstr(ptr, "-rd")) {    // read
+            // Copy the original command to yet another string so that it can be re-used
+            strcpy(com_to_parse2, command);
+
+            // Cut the part until the parameter, then cut the parameter itself
+            ptr = strtok(com_to_parse2, "\"");
             ptr = strtok(NULL, "\"");
-            char path[50];
-            strcpy(path, ptr);
-            read_list(&my_list, path);
+
+            // Handling no parameter error
+            if (ptr == NULL) {
+                printf("Unable to read from file, use \" \" to provide a path.\n");
+            } else {
+                char path[50];
+                strcpy(path, ptr);
+                read_list(&my_list, path);
+            }
 
         } else if (strstr(ptr, "-e")) {     // empty
             empty_list(&my_list);
@@ -88,6 +150,12 @@ int main()
                     check_task(&my_list, num - 1);
                 }
             }
+
+        // not working
+        } else {                            // bad command
+            clrscr();
+            printf("Unhandled command, use a command from this list:\n\n");
+            start_screen();
         }
     }
 
