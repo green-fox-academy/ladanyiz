@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "functions.h"
+
+void clrscr()
+{
+    system("@cls||clear");
+}
 
 void start_screen()
 {
@@ -9,6 +15,7 @@ void start_screen()
     printf("                    ToDo application\n");
     printf("==========================================================\n");
     printf("Commands:\n");
+    printf("s\tShow this start screen\n");
     printf("-a\tAdd a new task (-a \"task\")\n");
     printf("-wr\tWrite current tasks to a file (-wr \"filename.txt\")\n");
     printf("-rd\tRead tasks from a file (-rd \"filename.txt\")\n");
@@ -46,16 +53,24 @@ int list_tasks(list_t *list)
 {
     printf("\nList by number\n");
     printf("=====================================\n");
-    printf("Num   |   Task\n");
+    printf("Num    |   Task\n");
 
     if (list->size == 0) {
         return 0;
     } else {
         for (int i = 0; i < list->size; i++) {
-            if (list->array[i].checked == 1) {
-                printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
+            if (i < 9) {
+                if (list->array[i].checked == 1) {
+                    printf(" %d. [x]    %s\n", i + 1, list->array[i].todo);
+                } else {
+                    printf(" %d. [ ]    %s\n", i + 1, list->array[i].todo);
+                }
             } else {
-                printf("%d. [ ]    %s\n", i + 1, list->array[i].todo);
+                if (list->array[i].checked == 1) {
+                    printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
+                } else {
+                    printf("%d. [ ]    %s\n", i + 1, list->array[i].todo);
+                }
             }
         }
         printf("\n");
@@ -115,7 +130,7 @@ void empty_list(list_t *list)
     }
  */
     free(list->array);
-    list->size = 0;
+    init_list(list);
 
     printf("No ToDos for today! :)\n");
 }
@@ -123,16 +138,16 @@ void empty_list(list_t *list)
 
 int remove_task(list_t *list, int index)
 {
-    if (list->size == 1)
+    if (list->size == 1) {
         empty_list(list);
         return 0;
+    }
 
     task_t *new_array = calloc(list->size - 1, sizeof(task_t));
 
     if (index != 0)
         memcpy(new_array, list->array, sizeof(task_t) * index);
     if (index != list->size - 1)
-        //memcpy(new_array + index, list->array + index + 1, sizeof(task_t) * (list->size + 1 - index));
         memcpy(&new_array[index], &list->array[index + 1], sizeof(task_t) * (list->size - 1 - index));
 
     free(list->array);

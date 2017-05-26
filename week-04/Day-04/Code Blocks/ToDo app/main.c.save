@@ -22,9 +22,12 @@ int main()
         char *ptr;
         ptr = strtok(com_to_parse, " ");
 
-        if(strstr(ptr, "x")) {              // exit
+        if (strstr(ptr, "x")) {              // exit
             break;
 
+        } else if (strstr(ptr, "s")) {
+            
+        
         } else if (strstr(ptr, "-a")) {     // add
             ptr = strtok(com_to_parse2, "\"");
             ptr = strtok(NULL, "\"");
@@ -68,8 +71,7 @@ int main()
                     remove_task(&my_list, num - 1);
                 }
             }
-        }
-        
+
         } else if (strstr(ptr, "-c")) {     // check
             ptr = strtok(NULL, " ");
             if (ptr == NULL) {

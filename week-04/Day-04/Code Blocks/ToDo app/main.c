@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "functions.h"
 
 int main()
@@ -22,8 +23,12 @@ int main()
         char *ptr;
         ptr = strtok(com_to_parse, " ");
 
-        if(strstr(ptr, "x")) {              // exit
+        if (strstr(ptr, "x")) {              // exit
             break;
+
+        } else if (strstr(ptr, "s")) {
+            clrscr();
+            start_screen();
 
         } else if (strstr(ptr, "-a")) {     // add
             ptr = strtok(com_to_parse2, "\"");

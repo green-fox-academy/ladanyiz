@@ -15,6 +15,8 @@ typedef struct {
     int size;
 } list_t;
 
+void clrscr();
+
 void start_screen();
 
 void init_list(list_t *list);
