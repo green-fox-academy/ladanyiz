@@ -31,4 +31,6 @@ void empty_list(list_t *list);
 
 int remove_task(list_t *list, int index);
 
+int check_task(list_t *list, int index);
+
 #endif // FUNCTIONS_H_INCLUDED

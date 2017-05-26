@@ -46,13 +46,17 @@ int list_tasks(list_t *list)
 {
     printf("\nList by number\n");
     printf("=====================================\n");
-    printf("Num  |  Task\n");
+    printf("Num   |   Task\n");
 
     if (list->size == 0) {
         return 0;
     } else {
         for (int i = 0; i < list->size; i++) {
-        printf("%d.\t%s\n", i + 1, list->array[i].todo);
+            if (list->array[i].checked == 1) {
+                printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
+            } else {
+                printf("%d. [ ]    %s\n", i + 1, list->array[i].todo);
+            }
         }
         printf("\n");
     }
@@ -134,6 +138,14 @@ int remove_task(list_t *list, int index)
     free(list->array);
     list->array = new_array;
     list->size -= 1;
+
+    return 0;
+}
+
+
+int check_task(list_t *list, int index)
+{
+    list->array[index].checked = 1;
 
     return 0;
 }

@@ -68,6 +68,21 @@ int main()
                     remove_task(&my_list, num - 1);
                 }
             }
+
+        } else if (strstr(ptr, "-c")) {     // check
+            ptr = strtok(NULL, " ");
+            if (ptr == NULL) {
+                printf("Unable to check, no index provided\n");
+            } else {
+                int num = atoi(ptr);
+                if (num == 0) {
+                    printf("Unable to check, index not a number\n");
+                } else if (num > my_list.size) {
+                    printf("Unable to check, index out of bounds\n");
+                } else {
+                    check_task(&my_list, num - 1);
+                }
+            }
         }
     }
 
