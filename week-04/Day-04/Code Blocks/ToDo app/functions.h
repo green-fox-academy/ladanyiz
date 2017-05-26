@@ -21,12 +21,14 @@ void init_list(list_t *list);
 
 void add_task(list_t *list, char *todo, int chk, int pri);
 
-void list_tasks(list_t *list);
+int list_tasks(list_t *list);
 
 int write_list(list_t *list, char *path);
 
 int read_list(list_t *list, char *path);
 
 void empty_list(list_t *list);
+
+int remove_task(list_t *list, int index);
 
 #endif // FUNCTIONS_H_INCLUDED

@@ -15,19 +15,26 @@ int main()
     while (1) {
         gets(command);
         char com_to_parse[MAX_COMMAND_LENGTH];
+        char com_to_parse2[MAX_COMMAND_LENGTH];
         strcpy(com_to_parse, command);
+        strcpy(com_to_parse2, command);
 
         char *ptr;
-        ptr = strtok(com_to_parse, "\"");
+        ptr = strtok(com_to_parse, " ");
 
         if(strstr(ptr, "x")) {              // exit
             break;
 
         } else if (strstr(ptr, "-a")) {     // add
+            ptr = strtok(com_to_parse2, "\"");
             ptr = strtok(NULL, "\"");
-            char todo[MAX_TODO_LENGTH];
-            strcpy(todo, ptr);
-            add_task(&my_list, todo, 0, 0);
+            if (ptr == NULL) {
+                printf("Unable to add, use \" \" to add a task.\n");
+            } else {
+                char todo[MAX_TODO_LENGTH];
+                strcpy(todo, ptr);
+                add_task(&my_list, todo, 0, 0);
+            }
 
         } else if (strstr(ptr, "-l")) {     // list
             list_tasks(&my_list);
@@ -44,8 +51,23 @@ int main()
             strcpy(path, ptr);
             read_list(&my_list, path);
 
-        } else if (strstr(ptr, "-e")) {
+        } else if (strstr(ptr, "-e")) {     // empty
             empty_list(&my_list);
+
+        } else if (strstr(ptr, "-r")) {     // remove
+            ptr = strtok(NULL, " ");
+            if (ptr == NULL) {
+                printf("Unable to remove, no index provided\n");
+            } else {
+                int num = atoi(ptr);
+                if (num == 0) {
+                    printf("Unable to remove, index not a number\n");
+                } else if (num > my_list.size) {
+                    printf("Unable to remove, index out of bounds\n");
+                } else {
+                    remove_task(&my_list, num - 1);
+                }
+            }
         }
     }
 

@@ -14,7 +14,7 @@ void start_screen()
     printf("-rd\tRead tasks from a file (-rd \"filename.txt\")\n");
     printf("-l\tList all the tasks\n");
     printf("-e\tEmpty the list\n");
-    printf("-r\tRemove a task\n");
+    printf("-r\tRemove a task (-r number)\n");
     printf("-c\tComplete a task\n");
     printf("-p\tAdd priority to a task\n");
     printf("-lp\tList all tasks by priority\n");
@@ -42,17 +42,21 @@ void add_task(list_t *list, char *todo, int chk, int pri)
 }
 
 
-void list_tasks(list_t *list)
+int list_tasks(list_t *list)
 {
     printf("\nList by number\n");
     printf("=====================================\n");
     printf("Num  |  Task\n");
 
-    for (int i = 0; i < list->size; i++) {
+    if (list->size == 0) {
+        return 0;
+    } else {
+        for (int i = 0; i < list->size; i++) {
         printf("%d.\t%s\n", i + 1, list->array[i].todo);
+        }
+        printf("\n");
     }
-
-    printf("\n");
+    return 0;
 }
 
 
@@ -91,6 +95,7 @@ int read_list(list_t *list, char *path)
 
     while (fscanf(file, "%s %d %d\n", todo, &checked, &priority) == 3)
         add_task(list, todo, checked, priority);
+
     fclose(file);
 
     return 0;
@@ -99,13 +104,36 @@ int read_list(list_t *list, char *path)
 
 void empty_list(list_t *list)
 {
-    for (int i = 0; i < list->size; i++) {
+/*    for (int i = 0; i < list->size; i++) {
         strcpy(list->array[i].todo, "");
         list->array[i].checked = 0;
         list->array[i].priority = 0;
-        
-    list->size = 0;
-    
-    prin
     }
+ */
+    free(list->array);
+    list->size = 0;
+
+    printf("No ToDos for today! :)\n");
+}
+
+
+int remove_task(list_t *list, int index)
+{
+    if (list->size == 1)
+        empty_list(list);
+        return 0;
+
+    task_t *new_array = calloc(list->size - 1, sizeof(task_t));
+
+    if (index != 0)
+        memcpy(new_array, list->array, sizeof(task_t) * index);
+    if (index != list->size - 1)
+        //memcpy(new_array + index, list->array + index + 1, sizeof(task_t) * (list->size + 1 - index));        
+        memcpy(&new_array[index], &list->array[index + 1], sizeof(task_t) * (list->size - 1 - index));        
+
+    free(list->array);
+    list->array = new_array;
+    list->size -= 1;
+
+    return 0;
 }

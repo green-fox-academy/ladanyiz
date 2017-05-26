@@ -29,4 +29,6 @@ int read_list(list_t *list, char *path);
 
 void empty_list(list_t *list);
 
+void remove_task(list_t *list, int index);
+
 #endif // FUNCTIONS_H_INCLUDED
