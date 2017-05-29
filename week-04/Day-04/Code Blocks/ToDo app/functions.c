@@ -21,9 +21,9 @@ void start_screen()
     printf("-rd\tRead tasks from a file (-rd \"filename.txt\")\n");
     printf("-l\tList all the tasks\n");
     printf("-e\tEmpty the list\n");
-    printf("-r\tRemove a task (-r number)\n");
+    printf("-r\tRemove a task (-r index)\n");
     printf("-c\tComplete a task\n");
-    printf("-p\tAdd priority to a task\n");
+    printf("-p\tAdd priority to a task (-p index priority)\n");
     printf("-lp\tList all tasks by priority\n");
     printf("x\tExit the application\n");
     printf("==========================================================\n\n");
@@ -53,7 +53,7 @@ int list_tasks(list_t *list)
 {
     printf("\nList by number\n");
     printf("=====================================\n");
-    printf("Num    |   Task\n");
+    printf("Num    |   Task   |    Priority\n");
 
     if (list->size == 0) {
         return 0;
@@ -61,15 +61,27 @@ int list_tasks(list_t *list)
         for (int i = 0; i < list->size; i++) {
             if (i < 9) {
                 if (list->array[i].checked == 1) {
-                    printf(" %d. [x]    %s\n", i + 1, list->array[i].todo);
-                } else {
+                    if (list->array[i].priority == 0) {
+                        printf(" %d. [x]    %s\n", i + 1, list->array[i].todo);
+                    } else {
+                        printf(" %d. [x]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
+                    }
+                } else if (list->array[i].priority == 0) {
                     printf(" %d. [ ]    %s\n", i + 1, list->array[i].todo);
+                } else {
+                    printf(" %d. [ ]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
                 }
             } else {
                 if (list->array[i].checked == 1) {
-                    printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
-                } else {
+                    if (list->array[i].priority == 0) {
+                        printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
+                    } else {
+                        printf("%d. [x]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
+                    }
+                } else if (list->array[i].priority == 0) {
                     printf("%d. [ ]    %s\n", i + 1, list->array[i].todo);
+                } else {
+                    printf("%d. [ ]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
                 }
             }
         }
@@ -161,4 +173,18 @@ int remove_task(list_t *list, int index)
 void check_task(list_t *list, int index)
 {
     list->array[index].checked = 1;
+}
+
+
+void arrange_list(list_t *list)
+{
+    for (int i = 0; i < list->size - 1; i++) {
+        for (int j = list->size - 1; j > i; j--) {
+            if (list->array[j].priority > list->array[j - 1].priority) {
+                task_t tmp = list->array[j - 1];
+                list->array[j - 1] = list->array[j];
+                list->array[j] = tmp;
+            }
+        }
+    }
 }
