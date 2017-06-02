@@ -7,10 +7,13 @@
 #include <time.h>			// for the RNG
 #include <avr/interrupt.h>
 
-uint8_t answer = 0;
+volatile uint8_t answer = 0;
+volatile uint16_t counter = 0;
 
 ISR(PCINT0_vect){
-	answer = 1;
+	if (counter % 2 == 0)
+		answer = 1;
+	counter++;
 }
 
 void button_init(){
@@ -90,25 +93,20 @@ char UART_GetCharacter()
 
 void countdown(){
 	// Create a variable which will be a counter variable, initialize it with 0.
-	uint8_t cntr = 0;
+	uint16_t cntr = 0;
 	
 	// This will be the maximal value of our counter
-	const uint8_t cntr_max = 500;
+	const uint16_t cntr_max = 500;
 	
-	uint8_t i=3;
-		
-	while(cntr < cntr_max){
+	uint8_t i=9;
+	
+	while ((cntr < cntr_max) && (answer == 0)) {
 		// Check the TOV0 overflow flag. If an overflow happened do the following:
 		if ((TIFR0 & 0x01) == 1) {
 			
 			//	- clear the overflow flag
 			TIFR0 |= 1 << TOV0;
-			
-			//  - check the counter variable
-			//  - if it is smaller than the maximal value, than increment it!
-			if (cntr < cntr_max) {
-				cntr++;
-			}
+			cntr++;
 			
 			if(cntr%50 == 0){
 				printf("%d  ",i);
@@ -159,10 +157,10 @@ int main(void)
 				break;
 			}
 			else if (guess > number){
-				printf("My number is smaller, you have %d lives left.\r\n", lives -1);
+				printf("My number is lower, you have %d lives left.\r\n", lives -1);
 			}
 			else {
-				printf("My number is bigger, you have %d lives left.\r\n", lives -1);
+				printf("My number is higher, you have %d lives left.\r\n", lives -1);
 			}
 			printf("Your guess: ");
 			scanf("%d", &guess);

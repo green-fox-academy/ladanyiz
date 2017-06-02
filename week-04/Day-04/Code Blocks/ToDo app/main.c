@@ -143,7 +143,7 @@ int main()
                 int num = atoi(ptr);
                 if (num == 0) {
                     printf("Unable to remove, index not a number\n");
-                } else if (num > my_list.size) {
+                } else if ((num > my_list.size) || (num <= 0)) {
                     printf("Unable to remove, index out of bounds\n");
                 } else {
                     remove_task(&my_list, num - 1);
@@ -158,7 +158,7 @@ int main()
                 int num = atoi(ptr);
                 if (num == 0) {
                     printf("Unable to check, index not a number\n");
-                } else if (num > my_list.size) {
+                } else if ((num > my_list.size) || (num <= 0)) {
                     printf("Unable to check, index out of bounds\n");
                 } else {
                     check_task(&my_list, num - 1);

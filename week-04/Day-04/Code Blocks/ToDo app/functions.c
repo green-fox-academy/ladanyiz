@@ -61,30 +61,25 @@ int list_tasks(list_t *list)
         for (int i = 0; i < list->size; i++) {
             if (i < 9) {
                 if (list->array[i].checked == 1) {
-                    if (list->array[i].priority == 0) {
-                        printf(" %d. [x]    %s\n", i + 1, list->array[i].todo);
-                    } else {
-                        printf(" %d. [x]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
-                    }
-                } else if (list->array[i].priority == 0) {
-                    printf(" %d. [ ]    %s\n", i + 1, list->array[i].todo);
+                    printf(" %d. [x]    %s", i + 1, list->array[i].todo);
                 } else {
-                    printf(" %d. [ ]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
+                    printf(" %d. [ ]    %s", i + 1, list->array[i].todo);
                 }
             } else {
                 if (list->array[i].checked == 1) {
-                    if (list->array[i].priority == 0) {
-                        printf("%d. [x]    %s\n", i + 1, list->array[i].todo);
-                    } else {
-                        printf("%d. [x]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
-                    }
-                } else if (list->array[i].priority == 0) {
-                    printf("%d. [ ]    %s\n", i + 1, list->array[i].todo);
+                    printf("%d. [x]    %s", i + 1, list->array[i].todo);
                 } else {
-                    printf("%d. [ ]    %s  -  %d\n", i + 1, list->array[i].todo, list->array[i].priority);
+                    printf("%d. [ ]    %s", i + 1, list->array[i].todo);
                 }
             }
+
+            if (list->array[i].priority == 0) {
+                printf("\n");
+            } else {
+                printf("  -  %d\n", list->array[i].priority);
+            }
         }
+
         printf("\n");
     }
     return 0;
@@ -150,6 +145,9 @@ void empty_list(list_t *list)
 
 int remove_task(list_t *list, int index)
 {
+    if (list->size == 0)
+        return 0;
+
     if (list->size == 1) {
         empty_list(list);
         return 0;

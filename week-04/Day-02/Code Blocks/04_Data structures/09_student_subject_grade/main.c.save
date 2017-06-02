@@ -44,9 +44,6 @@ void set_grade(student_t *student, subject_t subject, int grade)
     student->grades[student->grade_count].subject = subject;
     student->grades[student->grade_count].value = grade;
     student->grade_count++;
-
-    // test
-
 }
 
 // TODO:
@@ -84,10 +81,11 @@ int main()
     student_t *student = create_student("Pistike", 12);
 
     set_grade(student, MATH, 3);
+/*
     set_grade(student, HISTORY, 2);
     set_grade(student, ENGLISH, 4);
     set_grade(student, SCIENCE, 3);
-
+ */
     switch (worst_subject(student)) {
     case 0:
         printf("The worst subject of %s is math\n", student->name);

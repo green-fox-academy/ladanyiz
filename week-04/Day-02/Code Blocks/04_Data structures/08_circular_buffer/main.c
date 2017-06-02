@@ -65,35 +65,36 @@ void resize(struct CircularBuffer *source, int new_size)
 // Create a function that takes a CircularBuffer and returns a new CircularBuffer that only contains the even numbers from the old CircularBuffer
 struct CircularBuffer *even_buffer(struct CircularBuffer *source)
 {
-    int count = 0;
+    struct CircularBuffer *even = malloc(sizeof(struct CircularBuffer));
+    even->head = NULL;
+    even->tail = NULL;
+    even->read = NULL;
+    even->write = NULL;
 
+    int count = 0;
     source->read = source->head;
+
+//  test
+    printf("%p\t%d\n", source->head, *source->head);
+    printf("%p\t%d\n", source->tail, *source->tail);
+    printf("%p\t%d\n", source->read, *source->read);
+    printf("%p\t%d\n", source->write, *source->write);
 
     while (source->read <= source->tail) {
         if ((*source->read > 0) && (*source->read % 2 == 0)) {
+            even->head = realloc(even->head, sizeof(int));
+            even->head[count] = *source->read;
             count++;
         }
         source->read++;
     }
 
-    struct CircularBuffer *result2 = malloc(sizeof(struct CircularBuffer));
-    result2->head = calloc(count, sizeof(int));
-    result2->size = sizeof(result2->head) / sizeof(result2->head[0]);
-    result2->tail = result2->head + (count - 1);
-    result2->read = result2->head;
-    result2->write = result2->head;
+    even->size = count;
+    even->tail = even->head + (count - 1);
+    even->read = even->head;
+    even->write = even->head;
 
-    source->read = source->head;
-
-    while (source->read <= source->tail) {
-        if (*source->read % 2 == 0) {
-            *result2->write = *source->read;
-            result2->write++;
-        }
-        source->read++;
-    }
-
-    return result2;
+    return even;
 };
 
 
