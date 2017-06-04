@@ -11,11 +11,11 @@ int main()
     pointer = calloc(5, sizeof(int));
 
     for (int i = 0; i < 5; i++) {
-        pointer[i] = i;
-        printf("%d\n", pointer[i]);
+        array[i] = i;
+        printf("%d\n", array[i]);
     }
 
-    free(pointer);
+    free(array);
 
     return 0;
 }

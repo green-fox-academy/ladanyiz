@@ -192,7 +192,6 @@ int main()
 
         } else if (strstr(ptr, "-lp")) {     // list by priority
             arrange_list(&my_list);
-            list_tasks(&my_list);
 
         // not working
         } else {                            // bad command

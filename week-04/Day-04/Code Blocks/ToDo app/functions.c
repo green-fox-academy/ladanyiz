@@ -173,7 +173,7 @@ void check_task(list_t *list, int index)
     list->array[index].checked = 1;
 }
 
-
+/*
 void arrange_list(list_t *list)
 {
     for (int i = 0; i < list->size - 1; i++) {
@@ -185,4 +185,30 @@ void arrange_list(list_t *list)
             }
         }
     }
+}
+ */
+
+void arrange_list(list_t *list)
+{
+    task_t *result = calloc(list->size, sizeof(task_t));
+    // memcpy(result, list->array, list->size);
+    for (int i = 0; i < list->size; i++)
+        result[i] = list->array[i];
+
+    for (int i = 0; i < list->size - 1; i++) {
+        for (int j = list->size - 1; j > i; j--) {
+            if (result[j].priority > result[j - 1].priority) {
+                task_t tmp = result[j - 1];
+                result[j - 1] = result[j];
+                result[j] = tmp;
+            }
+        }
+    }
+    list_t temp;
+    temp.array = result;
+    temp.size = list->size;
+
+    list_tasks(&temp);
+
+    free(result);
 }
