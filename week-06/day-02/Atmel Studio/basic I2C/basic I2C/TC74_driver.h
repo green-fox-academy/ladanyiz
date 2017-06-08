@@ -9,7 +9,7 @@
 //TODO
 //Define the TC74A0 address
 #define TC_ADDRESS	0b1001000
-#define temp_reg	0b00000000	//define temperature register of IC
+#define REG_ADDR	0b00000000	//define temperature register of IC
 
 void TWI_init(void);
 void TWI_start(void);

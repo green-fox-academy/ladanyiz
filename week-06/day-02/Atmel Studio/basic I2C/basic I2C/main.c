@@ -18,6 +18,13 @@
 
 void system_init()
 {
+	// Set the prescaler to 1024 division. See at the TC0 control register in the datasheet!
+	// With this you also set the clock source to CLK_io and you will also turn on the timer!
+	TCCR0B |= 0b00000101 ; // 0000 0000 | 0000 0101 -> 0000 0101
+
+	// Set the PB5 LED pin to output
+	DDRB |= 1 << DDRB5 ;
+
 	//TODO
 	// Call the TWI driver init function
 	TWI_init();
@@ -47,19 +54,38 @@ int main(void)
 	// Try printf
 	printf("Startup...\r\n");
 	
-	uint8_t temp = read_temp(TC_ADDRESS);
-	printf("%d\n", temp);
+	uint8_t temp_storage[8];
+	uint8_t cntr = 0;
+	uint8_t const max_cntr = 100;
+	uint8_t i = 0;
+	
+//	uint8_t temp = read_temp(TC_ADDRESS);
+//	printf("%d\n", temp);
 	
 	// Infinite loop
-	while (1) {
+	while (i < 8) {
 		//TODO
 		//Write the temperature frequently.
-
+		
 		//TODO
 		//Advanced: Don't use delay, use timer.
 
 		//TODO
 		//Blink the led to make sure the code is running
-
+		
+		if (((TIFR0 & 1) == 1) && (i < 8)) {
+			TIFR0 |= 1 << TOV0 ;
+			if (cntr < max_cntr) {
+				cntr++;
+			} else {
+				cntr = 0;
+				PINB |= 1 << PINB5;
+				temp_storage[i] = read_temp(TC_ADDRESS);
+				i++;
+			}
+		}
 	}
+	for (uint8_t j = 0; j < 8; j++) {
+		printf("%d\n", temp_storage[j]);
+	}		
 }
