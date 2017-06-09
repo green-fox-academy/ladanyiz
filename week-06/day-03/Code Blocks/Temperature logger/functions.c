@@ -6,17 +6,6 @@
 #include "rs232.h"
 #include "functions.h"
 
-time_t rawtime;
-struct tm *timeinfo;
-char time_buffer[30];
-
-/*
-void init_list(list_type *t_list)
-{
-    t_list->temp_array = NULL;
-    t_list->array_size = 0;
-}
- */
 
 void start_screen()
 {
@@ -38,6 +27,32 @@ void start_screen()
 }
 
 
+void list_ports()
+{
+    uint8_t n = comEnumerate();
+
+    for (uint8_t i = 0; i < n; i++) {
+        strcpy(port_name, comGetPortName(i));
+        printf("%d.  %s\n", i, port_name);
+    }
+}
+
+
+int8_t set_port()
+{
+    printf("Enter port name: ");
+    gets(port_name);
+    if (comFindPort(port_name) == -1) {
+        printf("Not a valid port name!\n");
+        return -1;
+    } else {
+        index = comFindPort(port_name);
+        printf("%s set.\n", port_name);
+    }
+    return 0;
+}
+
+
 int8_t file_ok(const char *filename, const char *op)
 {
     FILE *file = fopen(filename, op);
@@ -50,6 +65,30 @@ int8_t file_ok(const char *filename, const char *op)
 }
 
 
+void file_to_write()
+{
+    printf("Enter a file name: ");
+    gets(file_name);
+    if ((file_ok(file_name, "w")) != 1)
+        printf("Cannot create file \"%s\"\n", file_name);
+    else
+        printf("File to write: \"%s\"\n", file_name);
+}
+
+
+int8_t open_port()
+{
+    printf("Trying to access port...\n");
+    if (comOpen(comFindPort(port_name), 115200) == 0){
+        printf("Unable to open port!\n");
+        return -1;
+    } else {
+        printf("%s is open.\n", port_name);
+    }
+    return 0;
+}
+
+
 char *timestamp()
 {
     time (&rawtime);
@@ -59,7 +98,7 @@ char *timestamp()
 }
 
 
-int8_t write_file(char *filename)
+int8_t write_file(const char *filename)
 {
     int8_t i = 0;
     char buffer[1];
@@ -99,6 +138,25 @@ int8_t write_file(char *filename)
 }
 
 
+void close_port()
+{
+    printf("Trying to access port...\n");
+    comClose(index);
+    printf("%s is closed\n", port_name);
+}
+
+
+void file_to_read()
+{
+    printf("Enter file to read: ");
+    gets(file_name);
+    if ((file_ok(file_name, "r")) != 1)
+        printf("Cannot find file \"%s\"\n", file_name);
+    else
+        printf("File to read: \"%s\"\n", file_name);
+}
+
+
 int8_t read_file(const char *filename, const char *from, const char *to, list_type *t_list)
 {
     char date[30];
@@ -118,5 +176,22 @@ int8_t read_file(const char *filename, const char *from, const char *to, list_ty
     fclose(file);
 
     return 0;
+}
+
+
+void calc_avg()
+{
+    char from[30];
+    char to[30];
+    int64_t sum = 0;
+
+    printf("Enter \"from\" date (yyyy.mm.dd.hh:mm:ss): ");
+    gets(from);
+    printf("Enter \"to\" date (yyyy.mm.dd.hh:mm:ss): ");
+    gets(to);
+    read_file(file_name, from, to, &temp_list);
+    for (uint8_t i = 0; i < temp_list.array_size; i++)
+        sum += temp_list.temp_array[i];
+    printf("The average temperature of this period is %.1f\n", (float)sum / temp_list.array_size);
 }
 

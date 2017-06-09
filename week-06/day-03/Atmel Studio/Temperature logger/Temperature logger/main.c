@@ -58,7 +58,7 @@ int main(void)
 	//----- END OF STDIO IO BUFFER SETUP
 	
 	uint8_t cntr = 0;
-	uint8_t const max_cntr = 20;
+	uint8_t const max_cntr = 25;
 	uint8_t temp;
 	
 	// Infinite loop
