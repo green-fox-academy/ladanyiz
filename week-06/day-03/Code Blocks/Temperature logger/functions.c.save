@@ -31,25 +31,27 @@ void list_ports()
 {
     uint8_t n = comEnumerate();
 
-    for (uint8_t i = 0; i < n; i++) {
-        strcpy(port_name, comGetPortName(i));
-        printf("%d.  %s\n", i, port_name);
+    if (n == 0) {
+        printf("No available ports\n");
+    } else {
+        for (uint8_t i = 0; i < n; i++) {
+            strcpy(port_name, comGetPortName(i));
+            printf("%d.  %s\n", i, port_name);
+        }
     }
 }
 
 
-int8_t set_port()
+void set_port()
 {
     printf("Enter port name: ");
     gets(port_name);
     if (comFindPort(port_name) == -1) {
         printf("Not a valid port name!\n");
-        return -1;
     } else {
-        index = comFindPort(port_name);
+        port_index = comFindPort(port_name);
         printf("%s set.\n", port_name);
     }
-    return 0;
 }
 
 
@@ -60,7 +62,7 @@ int8_t file_ok(const char *filename, const char *op)
         return -1;
     } else {
         fclose(file);
-        return 1;
+        return 0;
     }
 }
 
@@ -76,16 +78,14 @@ void file_to_write()
 }
 
 
-int8_t open_port()
+void open_port()
 {
     printf("Trying to access port...\n");
-    if (comOpen(comFindPort(port_name), 115200) == 0){
+    if (comOpen(comFindPort(port_name), BAUD_RATE) == 0){
         printf("Unable to open port!\n");
-        return -1;
     } else {
         printf("%s is open.\n", port_name);
     }
-    return 0;
 }
 
 
@@ -102,10 +102,9 @@ int8_t write_file(const char *filename)
 {
     int8_t i = 0;
     char buffer[1];
-    char temp_str[5];
-    int8_t temp;
+    char temp_str[4];
 
-    if (!file_ok(filename, "w")) {
+    if (file_ok(filename, "w") == -1) {
         printf("No valid file name provided\n");
         return -1;
     } else {
@@ -114,15 +113,14 @@ int8_t write_file(const char *filename)
         FILE *file = fopen(filename, "w");
 
         while (1) {
-            if (comRead(0, buffer, 1) == 1) {
+            if (comRead(port_index, buffer, 1) == 1) {
                 if (buffer[0] != '\n') {
                     temp_str[i] = buffer[0];
                     i++;
                 } else {
                     temp_str[i] = '\0';
                     i = 0;
-                    temp = atoi(temp_str);
-                    fprintf(file, "%s\t%d\n", timestamp(), temp);
+                    fprintf(file, "%s\t%s\n", timestamp(), temp_str);
                     if (kbhit()) {
                         char ch = getch();
                         if (ch == 's') {
@@ -141,7 +139,7 @@ int8_t write_file(const char *filename)
 void close_port()
 {
     printf("Trying to access port...\n");
-    comClose(index);
+    comClose(port_index);
     printf("%s is closed\n", port_name);
 }
 
@@ -150,14 +148,14 @@ void file_to_read()
 {
     printf("Enter file to read: ");
     gets(file_name);
-    if ((file_ok(file_name, "r")) != 1)
+    if (file_ok(file_name, "r") == -1)
         printf("Cannot find file \"%s\"\n", file_name);
     else
         printf("File to read: \"%s\"\n", file_name);
 }
 
 
-int8_t read_file(const char *filename, const char *from, const char *to, list_type *t_list)
+void read_file(const char *filename, const char *from, const char *to, list_type *t_list)
 {
     char date[30];
     int temp;
@@ -172,10 +170,7 @@ int8_t read_file(const char *filename, const char *from, const char *to, list_ty
             t_list->array_size = i;
         }
     }
-
     fclose(file);
-
-    return 0;
 }
 
 
@@ -195,3 +190,41 @@ void calc_avg()
     printf("The average temperature of this period is %.1f\n", (float)sum / temp_list.array_size);
 }
 
+
+int8_t date_ok(char *string)
+{
+    if ((strlen(string) != 19) || (string[0] < '1') || (string[0] > '9')) {
+        return -1;
+
+    if ((string[4] != '.') || (string[7] != '.') || (string[10] != '.') || (string[13] != ':') || (string[16] != ':')
+        return -1;
+
+    for (uint8_t i = 1; i < 4; i++) {
+        if ((string[i] < '0') || (string[i] > '9')) {
+            return -1;
+        }
+    }
+
+    if ((string[5] < '0') || (string[5] > '1') || (string[6] < '0') || (string[6] > '9'))
+        return -1;
+
+    if ((string[5] == '0') && (string[6] == '0'))
+        return -1;
+
+    if ((string[5] == '1') && (string[6] > '2'))
+        return -1;
+
+    if ((string[8] < '0') || (string[8] > '3') || (string[9] < '0') || (string[9] > '9'))
+        return -1;
+
+    if ((string[8] == '0') && (string[9] == '0'))
+        return -1;
+
+    if ((string[8] == '3') && (string[9] > '1'))
+        return -1;
+
+    if ((string[5] == '0') && (string[6] == '2') && (string[8] > '2'))
+        return -1;
+
+    return 1;
+}
