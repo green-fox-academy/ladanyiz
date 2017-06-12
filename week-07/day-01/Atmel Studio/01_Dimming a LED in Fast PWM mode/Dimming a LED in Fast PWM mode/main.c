@@ -18,15 +18,15 @@
 int main(void)
 {
 	pwm_init();
-	
+// This is now set up for the ventilator	
 	while (1) {
-		for (uint8_t i = 0; i < 101; i++) {
+		for (uint8_t i = 23; i < 101; i++) {
 			OCR0A = set_duty_cycle(i);
-			_delay_ms(15);
+			_delay_ms(100);
 		}
-		for (uint8_t i = 99; i > 0; i--) {
+		for (uint8_t i = 99; i > 23; i--) {
 			OCR0A = set_duty_cycle(i);
-			_delay_ms(15);
+			_delay_ms(100);
 		}
 //		OCR0A = set_duty_cycle(50);
 	}

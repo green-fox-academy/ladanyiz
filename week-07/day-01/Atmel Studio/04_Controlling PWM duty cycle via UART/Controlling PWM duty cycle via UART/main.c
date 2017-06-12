@@ -31,14 +31,11 @@ int8_t input_ok(char *input)
 {
 	char message[25] = "Not a percentage number";
 	
-	if ((strlen(input) == 0) || (strlen(input) > 4)) {
-		printf("%s\n", message);
-		return -1;
-	} else if (strlen(input) == 1) {
+	if ((strlen(input) < 2) || (strlen(input) > 4)) {
 		printf("%s\n", message);
 		return -1;
 	} else if (strlen(input) == 2) {
-		if ((input[0] < '1') || (input[0] > '9')) {
+		if ((input[0] < '0') || (input[0] > '9')) {
 			printf("%s\n", message);
 			return -1;
 		}
@@ -51,7 +48,7 @@ int8_t input_ok(char *input)
 			return -1;
 		}
 	} else if (strlen(input) == 4) {
-		if (strcmp(input, "100") != 0) {
+		if (strncmp(input, "100", 3) != 0) {
 			printf("%s\n", message);
 			return -1;
 		}
@@ -79,9 +76,8 @@ int main(void)
 		printf("Enter percentage:\n");
 		gets(buffer);
 		puts(buffer);
-		printf("strlen=%d\n", strlen(buffer));
 		
-		if (input_ok(buffer) == 1) {
+		if (input_ok(buffer)) {
 			
 			data = atoi(buffer);
 		
