@@ -18,8 +18,8 @@
 
 void pwm_init()
 {
-	// Set prescaler to 1 (no prescaling) and the timer on
-	TCCR0B |= 1 << CS00;
+	// Set prescaler to 64 and with that the timer on
+	TCCR0B |= 3;
 
 	// Set Fast PWM mode with TOP = OCR0A
 	TCCR0A |= (1 << WGM01) | (1 << WGM00);
