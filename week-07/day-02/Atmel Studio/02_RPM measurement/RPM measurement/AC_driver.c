@@ -31,5 +31,5 @@ void AC_driver_init()
 // Write this function. It returns the measured rotation speed in RPM
 float get_rpm()
 {
-	return get_freq() * 8 * 60;	// Frequency here means how many ventilator blades pass before the sensor in one second.
-}								// We have to multiply by 8 to get one whole ventilator revolution, then by 60 to get revolutions per minute.
+	return get_freq() / 8 * 60;	// Frequency here means how many ventilator blades pass before the sensor in one second.
+}								// We have to divide by 8 to get one whole ventilator revolution, then multiply by 60 to get revolutions per minute.

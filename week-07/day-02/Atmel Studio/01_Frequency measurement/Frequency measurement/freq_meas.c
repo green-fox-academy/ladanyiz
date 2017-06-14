@@ -3,7 +3,7 @@
 #include <avr/interrupt.h>
 #include "freq_meas.h"
 #define  MAX_COUNTER_VALUE	65535
-
+/*
 volatile uint8_t overflow_counter = 0;
 volatile uint8_t rising_edge_counter = 0;
 volatile uint16_t first_timer_value = 0;
@@ -27,6 +27,27 @@ ISR(TIMER1_OVF_vect)
 {
 	if (rising_edge_counter < 2)			// count overflows only until the second rising edge
 		overflow_counter++;
+}
+ */
+volatile uint8_t overflow_counter = 0;
+volatile uint8_t number_of_overflows = 0;
+volatile uint16_t first_timer_value = 0;
+volatile uint16_t last_timer_value = 0;
+
+// TODO:
+// Write the interrupt handlers
+
+ISR(TIMER1_CAPT_vect)
+{
+	first_timer_value = last_timer_value;
+	last_timer_value = ICR1;
+	number_of_overflows = overflow_counter;
+	overflow_counter = 0;
+}
+
+ISR(TIMER1_OVF_vect)
+{
+	overflow_counter++;
 }
 
 void freq_meas_init()

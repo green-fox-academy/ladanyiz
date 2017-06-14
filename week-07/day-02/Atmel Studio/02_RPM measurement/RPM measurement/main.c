@@ -59,8 +59,8 @@ int main(void)
 		_delay_ms(500);
 		LED_PORT &= ~(1 << LED_PORT_POS);
 		_delay_ms(500);
-		printf("%f Hz\n", get_freq());
-		printf("%f RPM\n", get_rpm());
+		printf("%.0f Hz\n", get_freq());
+		printf("%.0f RPM\n", get_rpm());
 	}
 }
 

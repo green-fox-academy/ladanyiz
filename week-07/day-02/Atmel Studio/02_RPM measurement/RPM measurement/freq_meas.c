@@ -55,7 +55,7 @@ float get_freq()
 	float Tclk = 0.000016;		// 1 counter clock cycle in seconds
 	float T = Tclk * steps;		// input period time in seconds
 	float Hz = 1 / T;
-	printf("first counter value: %u\n", first_timer_value);
-	printf("last counter value: %u\n", last_timer_value);	
+	//printf("first counter value: %u\n", first_timer_value);
+	//printf("last counter value: %u\n", last_timer_value);	
 	return Hz;
 }
