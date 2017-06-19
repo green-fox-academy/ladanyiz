@@ -17,14 +17,10 @@
 #include "PWM.h"
 #include "UART_driver.h"
 #define MAX_RPM		4500
-//#define P			0.05
-//#define I			0.01
+#define P			0.05
+#define I			0.01
 #define MIN_OUTPUT	0
 #define MAX_OUTPUT	100
-
-float ref;
-float p_value;
-float i_value;
 
 void system_init()
 {
@@ -36,27 +32,8 @@ void system_init()
 	sei();
 }
 
-void handle_command(char *command)
-{	
-	char *ptr = strtok(command, " ");
-	if (strcmp(ptr, "r") == 0) {
-		ptr = strtok(NULL, " ");
-		ref = atof(ptr);
-	} else if (strcmp(ptr, "p") == 0) {
-		ptr = strtok(NULL, " ");
-		p_value = atof(ptr);
-	} else if (strcmp(ptr, "i") == 0) {
-		ptr = strtok(NULL, " ");
-		i_value = atof(ptr);
-	}
-}
-
 int main(void)
 {
-	char command[10];
-	ref = 4500;
-	p_value = 0.05;
-	i_value = 0.01;
 	float integral = 0;
 	system_init();
 	
@@ -71,24 +48,21 @@ int main(void)
 	
 	while (1)
 	{
-//		ref = (ADC_Read() >> 2) / (float)255 * MAX_RPM;
-		if (!UART_is_buffer_empty()) {
-			gets(command);
-			handle_command(command);
-		}
-		
+//		float ref = (ADC_Read() >> 2) / (float)255 * MAX_RPM;
+		float ref = 400;
 		printf("ref: %.0f\t\t", ref);
-		printf("P: %.3f\t\t", p_value);
-		printf("I: %.3f\t\t", i_value);
+		printf("P: %.3f\t\t", P);
+		printf("I: %.3f\t\t", I);
 		
 		float feedback = get_rpm();
+//		printf("feedback: %.0f\t\t", feedback);
 		
 		float err = ref - feedback;
 		printf("error: %.0f\t\t", err);
 		
 		integral += err;
 		
-		int16_t output = (int16_t)(p_value * err) + (i_value * integral);
+		int16_t output = (int16_t)(P * err) + (I * integral);
 		
 		if (output < MIN_OUTPUT) {
 			output = MIN_OUTPUT;

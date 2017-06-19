@@ -12,9 +12,9 @@ ISR(USART_RX_vect)
 	// Be aware that the write ptr might point to the end of the buffer.
 	// In this case you have to set it back to the start of the buffer
 	if (rx_buffer.write_ptr == rx_buffer.tail)
-	rx_buffer.write_ptr = rx_buffer.head;
+		rx_buffer.write_ptr = rx_buffer.head;
 	else
-	rx_buffer.write_ptr++;
+		rx_buffer.write_ptr++;
 
 }
 
@@ -71,9 +71,9 @@ char UART_get_character()
 	// Be aware that the read ptr might point to the end of the buffer.
 	// In this case you have to set it back to the start of the buffer
 	if (rx_buffer.read_ptr == rx_buffer.tail)
-	rx_buffer.read_ptr = rx_buffer.head;
+		rx_buffer.read_ptr = rx_buffer.head;
 	else
-	rx_buffer.read_ptr++;
+		rx_buffer.read_ptr++;
 
 
 	// Return the read character
@@ -83,7 +83,7 @@ char UART_get_character()
 uint8_t UART_is_buffer_empty()
 {
 	if (rx_buffer.read_ptr == rx_buffer.write_ptr)
-	return 1;
+		return 1;
 	else
-	return 0;
+		return 0;
 }
