@@ -128,7 +128,11 @@ int main(void) {
 		for (uint8_t i = 0; i < 3; i++)
 			HID_Buffer[i] = 0;
 		BSP_TS_GetState(&ts_state);
-		if (ts_state.touchDetected) {
+		if (ts_state.touchDetected == 2) {
+			click = 2;
+		} else if (ts_state.touchDetected == 1) {
+			if (click == 2)
+				continue;
 			// if first touch
 			if (first) {
 				// next won't be first
@@ -162,7 +166,17 @@ int main(void) {
 			// the next touch will be a new first
 			first = 1;
 			// if the touch was within the limit, therefore a click
-			if (click) {
+			if (click == 2) {
+				HAL_Delay(20);
+				// set right mouse click in buffer
+				HID_Buffer[0] = 2;
+				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
+				HAL_Delay(20);
+				// click finished, set no click in buffer
+				HID_Buffer[0] = 0;
+				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
+				HAL_Delay(20);
+			} else if (click == 1) {
 				HAL_Delay(20);
 				// set left mouse click in buffer
 				HID_Buffer[0] = 1;
@@ -172,9 +186,9 @@ int main(void) {
 				HID_Buffer[0] = 0;
 				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
 				HAL_Delay(20);
-				// set no click
-				click = 0;
 			}
+			// set no click
+			click = 0;
 		}
 	}
 }
