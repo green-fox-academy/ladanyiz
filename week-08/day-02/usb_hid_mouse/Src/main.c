@@ -56,20 +56,13 @@ typedef struct {
 } coordinate_t;
 
 /* Private define ------------------------------------------------------------*/
-#define LIMIT	5
+#define LIMIT	3
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 USBD_HandleTypeDef USBD_Device;
 uint8_t HID_Buffer[4];
-TS_StateTypeDef ts_state;
-int16_t orig_x = 0;
-int16_t orig_y = 0;
-int16_t last_x = 0;
-int16_t last_y = 0;
-uint8_t first = 1;
-uint8_t click = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -112,6 +105,14 @@ int main(void) {
 	
 	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
+	TS_StateTypeDef ts_state;
+	int16_t orig_x = 0;
+	int16_t orig_y = 0;
+	int16_t last_x = 0;
+	int16_t last_y = 0;
+	uint8_t first = 1;
+	uint8_t click = 0;
+
 	// This byte contains the button states
 	// 0b00000001 - the left mouse button is pressed
 	// 0b00000010 - the right mouse button is pressed
@@ -143,8 +144,8 @@ int main(void) {
 			// if still touched
 			} else {
 				// set the difference in coordinates in the buffer
-				HID_Buffer[1] = (ts_state.touchX[0] - last_x) * 2; // * 2, otherwise too slow
-				HID_Buffer[2] = (ts_state.touchY[0] - last_y) * 2;
+				HID_Buffer[1] = (ts_state.touchX[0] - last_x) * 3; // * 3, otherwise too slow
+				HID_Buffer[2] = (ts_state.touchY[0] - last_y) * 3;
 				// set the latest point of touch
 				last_x = ts_state.touchX[0];
 				last_y = ts_state.touchY[0];
@@ -154,7 +155,7 @@ int main(void) {
 					if ((abs(ts_state.touchX[0] - orig_x) > LIMIT) || (abs(ts_state.touchY[0] - orig_y) > LIMIT))
 						click = 0;
 				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
-				HAL_Delay(2);
+				HAL_Delay(10);
 			}
 		// screen is not touched now
 		} else {
@@ -162,13 +163,15 @@ int main(void) {
 			first = 1;
 			// if the touch was within the limit, therefore a click
 			if (click) {
+				HAL_Delay(20);
 				// set left mouse click in buffer
 				HID_Buffer[0] = 1;
 				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
-				HAL_Delay(2);
+				HAL_Delay(20);
 				// click finished, set no click in buffer
 				HID_Buffer[0] = 0;
 				USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
+				HAL_Delay(20);
 				// set no click
 				click = 0;
 			}
