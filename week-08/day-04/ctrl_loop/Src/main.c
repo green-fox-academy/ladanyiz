@@ -55,10 +55,10 @@ typedef struct {
 
 /* Private define ------------------------------------------------------------*/
 //#define USE_P_CTRLER
-ADC_HandleTypeDef hadc;
-ADC_ChannelConfTypeDef adc_sConfig;
-TIM_HandleTypeDef tim3_handle;
-TIM_OC_InitTypeDef pwm_sConfig;
+ADC_HandleTypeDef adc_handle;
+ADC_ChannelConfTypeDef adc_ch;
+TIM_HandleTypeDef tim_handle;
+TIM_OC_InitTypeDef tim_oc_init;
 
 
 /* Private macro -------------------------------------------------------------*/
@@ -102,6 +102,7 @@ int main(void)
 
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
+
   BSP_LED_Init(LED_GREEN);
 
   /* Add your application code here */
@@ -111,53 +112,51 @@ int main(void)
   BSP_LCD_DisplayOn();
   BSP_LCD_Clear(LCD_COLOR_BLACK);
 
-  tim3_handle.Instance = TIM3;
-  tim3_handle.Init.AutoReloadPreload = DISABLE;
-  tim3_handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  tim3_handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-  tim3_handle.Init.Period = 0x3FFF;
-  tim3_handle.Init.Prescaler = 1500;
-  tim3_handle.Init.RepetitionCounter = 0;
-  tim3_handle.State = HAL_TIM_STATE_RESET;
-  tim3_handle.Channel = HAL_TIM_ACTIVE_CHANNEL_1;
+  adc_handle.Instance = ADC3;
+  adc_handle.Init.ClockPrescaler        = ADC_CLOCKPRESCALER_PCLK_DIV4;
+  adc_handle.Init.Resolution            = ADC_RESOLUTION_12B;
+  adc_handle.Init.ScanConvMode          = DISABLE;                       /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
+  adc_handle.Init.ContinuousConvMode    = ENABLE;                       /* Continuous mode enabled to have continuous conversion  */
+  adc_handle.Init.DiscontinuousConvMode = DISABLE;                       /* Parameter discarded because sequencer is disabled */
+  adc_handle.Init.NbrOfDiscConversion   = 0;
+  adc_handle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;        /* Conversion start trigged at each external event */
+  adc_handle.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T1_CC1;
+  adc_handle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
+  adc_handle.Init.NbrOfConversion       = 1;
+  adc_handle.Init.DMAContinuousRequests = DISABLE;
+  adc_handle.Init.EOCSelection          = DISABLE;
 
-  HAL_TIM_PWM_MspInit(&tim3_handle);
-  HAL_TIM_PWM_Init(&tim3_handle);
+  HAL_ADC_MspInit(&adc_handle);
 
-  pwm_sConfig.OCMode = TIM_OCMODE_PWM1;
-  pwm_sConfig.Pulse =
+  HAL_ADC_Init(&adc_handle);
 
-  HAL_TIM_PWM_ConfigChannel(&tim3_handle)
+  adc_ch.Channel      = ADC_CHANNEL_0;
+  adc_ch.Rank         = 1;
+  adc_ch.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 
-  HAL_TIM_PWM__Start_IT(&tim3_handle);
+  HAL_ADC_ConfigChannel(&adc_handle, &adc_ch);
 
-  hadc.Instance = ADC3;
+  tim_handle.Instance = TIM3;
+  tim_handle.Init.AutoReloadPreload = DISABLE;
+  tim_handle.Init.CounterMode = TIM_COUNTERMODE_UP;
+  tim_handle.Init.Period = 0xFFFF;
+  tim_handle.Init.Prescaler = 3000;
+  tim_handle.Init.RepetitionCounter = 0;
+  tim_handle.State = HAL_TIM_STATE_RESET;
+  tim_handle.Channel = HAL_TIM_ACTIVE_CHANNEL_1;
 
-  hadc.Init.ClockPrescaler        = ADC_CLOCKPRESCALER_PCLK_DIV4;
-  hadc.Init.Resolution            = ADC_RESOLUTION_12B;
-  hadc.Init.ScanConvMode          = DISABLE;                       /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
-  hadc.Init.ContinuousConvMode    = ENABLE;                       /* Continuous mode enabled to have continuous conversion  */
-  hadc.Init.DiscontinuousConvMode = DISABLE;                       /* Parameter discarded because sequencer is disabled */
-  hadc.Init.NbrOfDiscConversion   = 0;
-  hadc.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;        /* Conversion start trigged at each external event */
-  hadc.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T1_CC1;
-  hadc.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
-  hadc.Init.NbrOfConversion       = 1;
-  hadc.Init.DMAContinuousRequests = DISABLE;
-  hadc.Init.EOCSelection          = DISABLE;
+  HAL_TIM_PWM_MspInit(&tim_handle);
 
-  HAL_ADC_MspInit(&hadc);
-  HAL_ADC_Init(&hadc);
+  HAL_TIM_PWM_Init(&tim_handle);
 
-  adc_sConfig.Channel      = ADC_CHANNEL_0;
-  adc_sConfig.Rank         = 1;
-  adc_sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  tim_oc_init.OCMode = TIM_OCMODE_PWM1;
+  tim_oc_init.Pulse = 0x7FFF;
 
+  HAL_TIM_PWM_ConfigChannel(&tim_handle, &tim_oc_init, TIM_CHANNEL_1);
 
-  HAL_ADC_ConfigChannel(&hadc, &adc_sConfig);
+  HAL_TIM_PWM_Start_IT(&tim_handle, TIM_CHANNEL_1);
 
-
-  int8_t cntr = 0;
+//  int8_t cntr = 0;
 
   /* Infinite loop */
   while (1)
@@ -166,12 +165,12 @@ int main(void)
 	  //sprintf(buff, "%d", cntr);
 	  //BSP_LCD_ClearStringLine(0);
 	  //BSP_LCD_DisplayStringAtLine(0, (uint8_t *)buff);
-	  cntr++;
+//	  cntr++;
 	  BSP_LED_Toggle(LED_GREEN);
 	  HAL_Delay(10);
-	  HAL_ADC_Start(&hadc);
-	  HAL_ADC_PollForConversion(&hadc, 10);
-	  sprintf(buff, "%d", HAL_ADC_GetValue(&hadc));
+	  HAL_ADC_Start(&adc_handle);
+	  HAL_ADC_PollForConversion(&adc_handle, 10);
+	  sprintf(buff, "%d", HAL_ADC_GetValue(&adc_handle));
 	  BSP_LCD_ClearStringLine(1);
 	  BSP_LCD_DisplayStringAtLine(1, (uint8_t *)buff);
   }

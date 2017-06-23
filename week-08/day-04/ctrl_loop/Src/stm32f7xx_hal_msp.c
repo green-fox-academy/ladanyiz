@@ -95,13 +95,13 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	GPIO_InitTypeDef GPIO_Init;
+	GPIO_InitTypeDef gpio_init;
 
-	GPIO_Init.Pin = GPIO_PIN_4;
-	GPIO_Init.Mode = GPIO_MODE_AF_PP;
-	GPIO_Init.Pull = GPIO_NOPULL;
-	GPIO_Init.Alternate = GPIO_AF2_TIM3;
-	HAL_GPIO_Init(GPIOB, &GPIO_Init);
+	gpio_init.Pin = GPIO_PIN_4;
+	gpio_init.Mode = GPIO_MODE_AF_PP;
+	gpio_init.Pull = GPIO_NOPULL;
+	gpio_init.Alternate = GPIO_AF2_TIM3;
+	HAL_GPIO_Init(GPIOB, &gpio_init);
 }
 
 void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
@@ -115,13 +115,13 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	GPIO_InitTypeDef GPIO_Init;
+	GPIO_InitTypeDef gpio_init;
 
-	GPIO_Init.Pin = GPIO_PIN_0;
-	GPIO_Init.Mode = GPIO_MODE_ANALOG;
-	GPIO_Init.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA, &GPIO_Init);
+	gpio_init.Pin = GPIO_PIN_0;
+	gpio_init.Mode = GPIO_MODE_ANALOG;
+	gpio_init.Pull = GPIO_NOPULL;
 
+	HAL_GPIO_Init(GPIOA, &gpio_init);
 }
 
 /**
