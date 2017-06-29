@@ -4,8 +4,7 @@
 #include <winsock2.h>
 #include <conio.h>
 #include <stdint.h>
-#include "servers.h"
-#include "functions.h"
+#include "tmp.h"
 
 void message_listen()
 {
@@ -34,42 +33,34 @@ void message_listen()
 		handle_error("listen() ");
 
 	// Create variables which will be used in the while loop
-	SOCKADDR client;    // Client address structure
-	SOCKET cli_sock;    // Slave socket definition, this will be used to store the incoming socket
-	char buffer[256];   // Buffer for incoming and outgoing data
-	int cntr = 1;       // Counter for incoming connections
+	SOCKADDR_IN client;     // Client address structure
+	int client_size = sizeof(client);
+	SOCKET cli_sock;        // Slave socket definition, this will be used to store the incoming socket
+	char message[256];      // Buffer for incoming and outgoing data
 
     while (1) {
 		// Accept the connection and save the incoming socket
-		cli_sock = accept(msg_sock, &client, NULL);
+		cli_sock = accept(msg_sock, &client, &client_size);
 		// Check if the socket is valid
 		if (cli_sock < 0)
 			handle_error("accept()");
 
 		// Receive the data sent by the client
-		int received_bytes;
-		do {
-			received_bytes = recv(cli_sock, buffer, 256, 0);
-			if (received_bytes == 0) {
-				printf("Connection closed, waiting for an other connection!\n");
-			} else if (received_bytes == SOCKET_ERROR) {
-				printf("Something went wrong with the client socket, trying to close it...\n");
-				break;
-			} else {
-				// Terminate the string with zero
-				buffer[received_bytes] = '\0';
-				// Print out the received data
-				printf("Received string: %s \n", buffer);
-			}
-		} while (received_bytes > 0);
-
+		int received_bytes = recv(cli_sock, message, 256, 0);
+        if (received_bytes == 0) {
+            printf("Connection closed, waiting for an other connection!\n");
+        } else if (received_bytes == SOCKET_ERROR) {
+            printf("Something went wrong with the client socket, trying to close it...\n");
+            break;
+        } else {
+            // Terminate the string with zero
+            message[received_bytes] = '\0';
+            // Print out the received data
+            puts(message);
+        }
 		closesocket(cli_sock);
-		printf("%d. client socket closed\n\n", cntr);
-		cntr++;
     }
-
 	closesocket(msg_sock);
-	WSACleanup();
 }
 
 
@@ -82,7 +73,7 @@ void disco_listen()
     server.sin_addr.S_un.S_addr = INADDR_ANY;
 
 	// Creating the socket
-	SOCKET dis_sock = socket(AF_INET, SOCK_STREAM, 0);
+	SOCKET dis_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 	// Check if socket is ok
 	if (dis_sock < 0)
 		handle_error("socket() ");
@@ -100,54 +91,49 @@ void disco_listen()
 		handle_error("listen() ");
 
 	// Create variables which will be used in the while loop
-	SOCKADDR client;    // Client address structure
-	SOCKET cli_sock;    // Slave socket definition, this will be used to store the incoming socket
-	char buffer[256];   // Buffer for incoming and outgoing data
-	int cntr = 1;       // Counter for incoming connections
+	SOCKADDR_IN client;                 // Client address structure
+	int client_size = sizeof(client);
+	SOCKET cli_sock;                    // Slave socket definition, this will be used to store the incoming socket
+	char message[30];                   // Buffer for incoming and outgoing data
 
     while (1) {
 		// Accept the connection and save the incoming socket
-		cli_sock = accept(dis_sock, &client, NULL);
+		cli_sock = accept(dis_sock, &client, &client_size);
 		// Check if the socket is valid
 		if (cli_sock < 0)
 			handle_error("accept()");
 
 		// Receive the data sent by the client
-		int received_bytes;
-		do {
-			received_bytes = recv(cli_sock, buffer, 256, 0);
-			if (received_bytes == 0) {
-				printf("Connection closed, waiting for an other connection!\n");
-			} else if (received_bytes == SOCKET_ERROR) {
-				printf("Something went wrong with the client socket, trying to close it...\n");
-				break;
-			} else {
-				// Terminate the string with zero
-				buffer[received_bytes] = '\0';
-				// Print out the received data
-				printf("Received string: %s \n", buffer);
-				// Send back the requested data
-				send(cli_sock, buffer, received_bytes, 0);
-			}
-		} while (received_bytes > 0);
+        uint16_t received_bytes = recv(cli_sock, message, 30, 0);
+        if (received_bytes == 0) {
+            printf("Connection closed, waiting for an other connection!\n");
+        } else if (received_bytes == SOCKET_ERROR) {
+            printf("Something went wrong with the client socket, trying to close it...\n");
+            break;
+        } else {
+            // Terminate the string with zero
+            message[received_bytes] = '\0';
+
+            // Fill the user structure with data
+            strcpy(user_list[list_size].ip, inet_ntoa(client.sin_addr));
+            strcpy(user_list[list_size].name, strtok(message, " "));
+            user_list[list_size].port = atoi(strtok(NULL, "\n"));
+            list_size++;
+        }
 
 		closesocket(cli_sock);
-		printf("%d. client socket closed\n\n", cntr);
-		cntr++;
     }
-
 	closesocket(dis_sock);
-	WSACleanup();
 }
 
 
 void broadcast_listen()
 {
-	static int so_broadcast = 1;
-	char message[30] = " ";
+	int so_broadcast = 1;
+	char message[30];
 
 	// Creating the UDP socket
-	SOCKET brdcst_sock = socket(AF_INET, SOCK_DGRAM, 0);
+	SOCKET brdcst_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	// Check if socket is ok
 	if (brdcst_sock < 0)
 		handle_error("socket() ");
@@ -168,24 +154,26 @@ void broadcast_listen()
 		handle_error("bind() ");
 
     // Create address structure for client
-    SOCKADDR_IN sender;
-    int sender_size = sizeof(sender);
+    SOCKADDR_IN client;
+    int client_size = sizeof(client);
 
     // Handle incoming messages
     while(1) {
-        recvfrom(brdcst_sock, message, sizeof(message), 0, (SOCKADDR*)&sender, &sender_size);
+        recvfrom(brdcst_sock, message, sizeof(message), 0, (SOCKADDR*)&client, &client_size);
 
         char *begin = strtok(message, " ");
         char *end = strtok(NULL, "\"");
         if ((strstr(begin, "TOTORO") != NULL)) {
+            //Generate return message
             uint16_t disco_port = atoi(end);
-            char *sender_ip = inet_ntoa(sender.sin_addr);
+            char *sender_ip = inet_ntoa(client.sin_addr);
             char msg[20] = "";
             strcpy(msg, my_name);
             strcat(msg, " ");
             char port[6];
             itoa(MESSAGE_PORT, port, 10);
             strcat(msg, port);
+            // Send message
             tcp_send(sender_ip, disco_port, msg);
         }
     }

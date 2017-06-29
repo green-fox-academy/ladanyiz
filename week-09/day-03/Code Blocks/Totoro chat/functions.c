@@ -4,8 +4,7 @@
 #include <winsock2.h>
 #include <conio.h>
 #include <stdint.h>
-#include "servers.h"
-#include "functions.h"
+#include "tmp.h"
 
 void handle_error(const char *error_string)
 {
@@ -21,10 +20,10 @@ void wsa_init()
 {
 	WSADATA wsa_data;
 	int result = WSAStartup(MAKEWORD(2, 2), &wsa_data);
-	if (result != NO_ERROR) {
+	if (result != NO_ERROR)
 		handle_error("WSAStartup() ");
-	}
 }
+
 
 void start_screen()
 {
@@ -41,8 +40,10 @@ void start_screen()
 	printf("==========================================================\n\n");
 }
 
-void broadcast() {
-	static int so_broadcast = 1;
+
+void broadcast()
+{
+	int so_broadcast = 1;
 
 	// Server address structure initialization
 	SOCKADDR_IN server;
@@ -51,7 +52,7 @@ void broadcast() {
     server.sin_addr.S_un.S_addr = BRDCST_IP;
 
 	// Creating the UDP socket
-	SOCKET brdcst_sock = socket(AF_INET, SOCK_DGRAM, 0);
+	SOCKET brdcst_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	// Check if socket is ok
 	if (brdcst_sock < 0)
 		handle_error("socket() ");
@@ -60,11 +61,11 @@ void broadcast() {
     setsockopt(brdcst_sock, SOL_SOCKET, SO_BROADCAST, &so_broadcast, sizeof(so_broadcast));
 
 	// Connecting the client socket to the server
-	int result = connect(brdcst_sock, (SOCKADDR*)&server, sizeof(server));
+	int8_t result = connect(brdcst_sock, (SOCKADDR*)&server, sizeof(server));
 	if (result < 0)
 		handle_error("connect() ");
 
-    // Sending message
+    // Create and send message
     char msg[30] = "TOTORO ";
     char port[6];
     itoa(DISCO_PORT, port, 10);
@@ -72,14 +73,16 @@ void broadcast() {
 	result = send(brdcst_sock, msg, strlen(msg), 0);
 	if (result < 0)
 		handle_error("send() ");
+    printf("Discovery request \"%s\" sent\n", msg);
 
     closesocket(brdcst_sock);
 }
 
+
 void tcp_send(char *server_ip, uint16_t server_port, char *msg)
 {
 	// Creating client socket
-	SOCKET cli_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_IP);
+	SOCKET cli_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 	if (cli_sock < 0)
 		handle_error("socket() ");
 
@@ -98,7 +101,55 @@ void tcp_send(char *server_ip, uint16_t server_port, char *msg)
 	result = send(cli_sock, msg, strlen(msg), 0);
 	if (result < 0)
 		handle_error("send() ");
-
+    printf("Message \"%s\" sent\n", msg);
     closesocket(cli_sock);
 }
 
+
+void list_users()
+{
+    if (list_size == 0) {
+        printf("User list is empty\n");
+    } else {
+        puts("Users:");
+        for (uint8_t i = 0; i < list_size; i++) {
+            printf("%s\t%d\t%s\n", user_list[i].ip, user_list[i].port, user_list[i].name);
+        }
+        printf("\n");
+    }
+}
+
+
+uint8_t send_message()
+{
+    // Check if there is anyone to send to
+    if (list_size == 0) {
+        puts("User list is empty");
+        return 1;
+    }
+    char *buffer;
+    char *message;
+    printf("Enter <user name> <message>: ");
+    // Get string
+    gets(buffer);
+    // Cut the name part
+    char *name = strtok(buffer, " ");
+    int8_t index = -1;
+    for (uint8_t i = 0; i < list_size; i++) {
+        // If name is found, save its index and exit the loop
+        if (strstr(name, user_list[i].name) != NULL) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) {
+        puts("Name not found\n");
+        return 1;
+    } else {
+        // Cut the message part
+        message = strtok(NULL, "\n");
+        // Send the message
+        tcp_send(user_list[index].ip, user_list[index].port, message);
+    }
+    return 0;
+}

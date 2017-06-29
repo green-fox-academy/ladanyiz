@@ -4,19 +4,18 @@
 #include <winsock2.h>
 #include <conio.h>
 #include <stdint.h>
-#include "servers.h"
-#include "functions.h"
+#include "tmp.h"
 
 int main()
 {
-    my_name = NULL;
+    list_size = 0;
+
     wsa_init();
 
-//    _beginthread(message_listen(), 0, NULL);
-//    _beginthread(disco_listen(), 0, NULL);
-    _beginthread(broadcast_listen(), 0, NULL);
+    _beginthread(message_listen, 0, NULL);
+    _beginthread(disco_listen, 0, NULL);
+    _beginthread(broadcast_listen, 0, NULL);
 
-    user_t *list = NULL;
     char command;
 
     start_screen();
@@ -37,17 +36,21 @@ int main()
                 printf("%s is set\n", my_name);
                 break;
             case 'l':
+                list_users();
                 break;
             case 'd':
                 broadcast();
                 break;
             case 'm':
+                send_message();
                 break;
             default:
                 break;
             }
         }
     }
+
+    WSACleanup();
 
     return 0;
 }
