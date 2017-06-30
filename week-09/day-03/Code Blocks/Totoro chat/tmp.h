@@ -36,7 +36,7 @@ void broadcast_listen();
 
 void broadcast();
 
-void tcp_send(char *server_ip, uint16_t server_port, char *msg);
+uint8_t tcp_send(char *server_ip, uint16_t server_port, char *msg);
 
 void list_users();
 
