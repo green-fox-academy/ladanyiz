@@ -94,21 +94,26 @@ int main(void) {
 
 	LCD_Config();
 	
+	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
+
 	TS_StateTypeDef ts_state;
 
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	uint8_t radius = 5;
+	uint8_t radius = 3;
 
 	while (1) {
 		BSP_TS_GetState(&ts_state);
 		if (ts_state.touchDetected && ts_state.touchX[0] > 441 && ts_state.touchX[0] < 480 && ts_state.touchY[0] > 0 && ts_state.touchY[0] < 39) {
-			LCD_Config();
+			BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+			radius = 11;
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 40 && ts_state.touchY[0] < 70) {
-			radius = 5;
+			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+			radius = 3;
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 70 && ts_state.touchY[0] < 100) {
-			radius = 9;
+			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+			radius = 7;
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 109 && ts_state.touchY[0] < 139) {
-			radius = 13;
+			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+			radius = 11;
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 155 && ts_state.touchY[0] < 185) {
 			BSP_LCD_SetTextColor(LCD_COLOR_RED);
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 195 && ts_state.touchY[0] < 225) {
@@ -118,6 +123,8 @@ int main(void) {
 		} else if (ts_state.touchDetected && ts_state.touchX[0] > 13 && ts_state.touchX[0] < 428 && ts_state.touchY[0] > 13 && ts_state.touchY[0] < 259) {
 			BSP_LCD_FillCircle(ts_state.touchX[0], ts_state.touchY[0], radius);
 		}
+		if (BSP_PB_GetState(BUTTON_KEY) == 1)
+			LCD_Config();
 	}
 }
 
@@ -150,21 +157,21 @@ static void LCD_Config(void)
   BSP_LCD_SetTransparency(0, 0);
   BSP_LCD_SetTransparency(1, 255);
 
-  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-  BSP_LCD_DrawVLine(441, 0, 272);
-  BSP_LCD_DrawHLine(441, 38, 39);
-  BSP_LCD_DisplayChar(452, 10, 67);
-  BSP_LCD_DrawHLine(441, 146, 39);
-  BSP_LCD_FillCircle(460, 55, 5);
-  BSP_LCD_FillCircle(460, 85, 9);
-  BSP_LCD_FillCircle(460, 124, 13);
-
   BSP_LCD_SetTextColor(LCD_COLOR_RED);
   BSP_LCD_FillCircle(460, 170, 13);
   BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
   BSP_LCD_FillCircle(460, 210, 13);
   BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
   BSP_LCD_FillCircle(460, 250, 13);
+
+  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+  BSP_LCD_DrawCircle(460, 18, 11);
+  BSP_LCD_DrawVLine(441, 0, 272);
+  BSP_LCD_DrawHLine(441, 38, 39);
+  BSP_LCD_DrawHLine(441, 146, 39);
+  BSP_LCD_FillCircle(460, 55, 3);
+  BSP_LCD_FillCircle(460, 85, 7);
+  BSP_LCD_FillCircle(460, 124, 11);
 
   BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 }
