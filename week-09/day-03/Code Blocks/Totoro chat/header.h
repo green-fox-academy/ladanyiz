@@ -9,7 +9,7 @@
 #define BRDCST_IP       inet_addr("255.255.255.255")
 
 typedef struct {
-    char name[30];
+    char name[20];
     char ip[20];
     uint16_t port;
 } user_t;
@@ -18,6 +18,8 @@ typedef struct {
 user_t user_list[50];
 
 uint8_t list_size;
+
+FILE *file;
 
 char my_name[20];
 
@@ -41,5 +43,9 @@ uint8_t tcp_send(char *server_ip, uint16_t server_port, char *msg);
 void list_users();
 
 uint8_t send_message();
+
+uint8_t save_to_file(char *path);
+
+uint8_t read_from_file(char *path);
 
 #endif // HEADER_H_INCLUDED

@@ -4,12 +4,12 @@
 #include <winsock2.h>
 #include <conio.h>
 #include <stdint.h>
-#include "tmp.h"
+#include "header.h"
 
 
 void broadcast_listen()
 {
-	int so_broadcast = 1;
+	char so_broadcast = '1';
 	char message[30];
 
 	// Creating the UDP socket
@@ -17,6 +17,7 @@ void broadcast_listen()
 	// Check if socket is ok
 	if (brdcst_sock < 0)
 		handle_error("socket() ");
+    fprintf(file, "%s\tbroadcast listener socket no. u% created", timestamp(), brdcst_sock);
 
     // Set UDP broadcast
     setsockopt(brdcst_sock, SOL_SOCKET, SO_BROADCAST, &so_broadcast, sizeof(so_broadcast));

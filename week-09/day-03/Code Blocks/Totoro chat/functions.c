@@ -4,10 +4,12 @@
 #include <winsock2.h>
 #include <conio.h>
 #include <stdint.h>
-#include "tmp.h"
+#include "header.h"
+#include "timestamp.h"
 
 void handle_error(const char *error_string)
 {
+    fprintf(file, "%s\tError: %s, error code: %d\n", timestamp(), error_string, WSAGetLastError());
 	printf("\nError: %s\nError code: %d", error_string, WSAGetLastError());
 	WSACleanup();
 	printf("\nPress any key to exit from the program...");
@@ -35,6 +37,8 @@ void start_screen()
 	printf("e\tExit\n");
 	printf("n\tSet user name\n");
 	printf("l\tList known users\n");
+	printf("s\tSave user list to file\n");
+	printf("r\tRead user list from file\n");
 	printf("d\tSend discovery request\n");
 	printf("m\tSend message\n");
 	printf("==========================================================\n\n");
@@ -43,7 +47,7 @@ void start_screen()
 
 void broadcast()
 {
-	int so_broadcast = 1;
+	char so_broadcast = '1';
 
 	// Creating the UDP socket
 	SOCKET brdcst_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -130,7 +134,7 @@ uint8_t send_message()
         puts("User list is empty");
         return 1;
     } */
-    char *buffer;
+    char buffer[50];
     char *message;
     printf("\nEnter <user name> <message>: ");
     // Get string
@@ -154,5 +158,62 @@ uint8_t send_message()
         // Send the message
         tcp_send(user_list[index].ip, user_list[index].port, message);
     }
+    return 0;
+}
+
+
+uint8_t save_to_file(char *path)
+{
+    if (path == NULL) {
+        printf("\nInvalid file name.");
+        return 1;
+    }
+
+    FILE *file = fopen(path, "w");
+
+    if (file == NULL) {
+        printf("\nCannot open file.");
+        return 1;
+    }
+
+    for (uint8_t i = 0; i < list_size; i++)
+        fprintf(file, "%s\t%d\t%s\n", user_list[i].ip, user_list[i].port, user_list[i].name);
+
+    fclose(file);
+    printf("\nList saved to file \"%s\"", path);
+
+    return 0;
+}
+
+
+uint8_t read_from_file(char *path)
+{
+    if (path == NULL) {
+        printf("\nInvalid file name.");
+        return 1;
+    }
+
+    FILE *file = fopen(path, "r");
+
+    if (file == NULL) {
+        printf("\nUnable to open file.");
+        return 1;
+    }
+
+    char ip[20];
+    uint16_t port;
+    char name[20];
+    uint8_t index = 0;
+
+    while (fscanf(file, "%s\t%d\t%s\n", ip, &port, name) == 3) {
+        strcpy(user_list[index].ip, ip);
+        strcpy(user_list[index].name, name);
+        user_list[index].port = port;
+        index++;
+    }
+
+    fclose(file);
+    printf("\nUser list loaded.");
+
     return 0;
 }
