@@ -189,6 +189,7 @@ void message_listen()
             message[received_bytes] = '\0';
             // Print out the received data
             char *ip = inet_ntoa(client.sin_addr);
+            puts(ip);
             char name[15] = "Unknown user";
             int8_t index = -1;
             if (list_size > 0) {
