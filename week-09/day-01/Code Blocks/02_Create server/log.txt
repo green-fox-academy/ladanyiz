@@ -1,0 +1,35 @@
+2017-07-04 10:52:48	Winsock initialized
+2017-07-04 10:52:48	Socket created
+2017-07-04 10:52:48	Bind done
+2017-07-04 10:52:48	Waiting for incoming connections...
+2017-07-04 11:22:20	Winsock initialized
+2017-07-04 11:22:20	Socket created
+2017-07-04 11:22:20	Bind done
+2017-07-04 11:22:20	Waiting for incoming connections...
+2017-07-04 11:24:22	Winsock initialized
+2017-07-04 11:24:22	Socket created
+2017-07-04 11:24:22	Bind done
+2017-07-04 11:24:22	Waiting for incoming connections...
+2017-07-04 11:24:27	Connection accepted from 127.0.0.1 on port 55116
+2017-07-04 11:24:39	Received :hello
+2017-07-04 11:24:39	Sent :hello
+2017-07-04 11:32:52	Winsock initialized
+2017-07-04 11:32:52	Socket created
+2017-07-04 11:32:52	Bind done
+2017-07-04 11:32:52	Waiting for incoming connections...
+2017-07-04 11:36:06	Winsock initialized
+2017-07-04 11:36:06	Socket created
+2017-07-04 11:36:06	Bind done
+2017-07-04 11:36:06	Waiting for incoming connections...
+2017-07-04 11:36:13	Connection accepted from 127.0.0.1 on port 55124
+2017-07-04 11:36:20	Received :Zoli
+2017-07-04 11:36:20	Sent :Zoli
+2017-07-04 11:38:27	Winsock initialized
+2017-07-04 11:38:27	Socket created
+2017-07-04 11:38:27	Bind done
+2017-07-04 11:38:27	Waiting for incoming connections...
+2017-07-04 11:38:30	Connection accepted from 10.27.6.194 on port 55126
+2017-07-04 11:39:11	Winsock initialized
+2017-07-04 11:39:11	Socket created
+2017-07-04 11:39:11	Bind done
+2017-07-04 11:39:11	Waiting for incoming connections...

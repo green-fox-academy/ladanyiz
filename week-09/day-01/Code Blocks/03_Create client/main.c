@@ -31,7 +31,7 @@ int main()
     SOCKADDR_IN server;
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
-    server.sin_addr.S_un.S_addr = inet_addr("10.27.6.52");
+    server.sin_addr.s_addr = inet_addr("10.27.6.194");
 
     //Connect to remote server
     if (connect(client, (SOCKADDR*)&server, sizeof(server)) < 0)

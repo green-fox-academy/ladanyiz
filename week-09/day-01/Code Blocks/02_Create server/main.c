@@ -4,7 +4,7 @@
 #include <winsock2.h>
 #include "timestamp.h"
 
-#define PORT 777
+#define PORT 17777
 
 // Create Server and Client Applications that send and receive messages.
 // Server.
