@@ -11,6 +11,7 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void socket_client_thread(void const *argument);
+void prepare_screen();
 
 #endif /* __SOCKET_CLIENT_H */
 

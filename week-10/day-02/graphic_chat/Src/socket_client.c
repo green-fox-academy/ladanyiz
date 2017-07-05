@@ -23,6 +23,23 @@ void terminate_thread()
 		osThreadTerminate(NULL);
 }
 
+void prepare_screen() {
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_FillRect(441, 0, 39, 46);
+	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	BSP_LCD_FillRect(441, 46, 39, 45);
+	BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+	BSP_LCD_FillRect(441, 91, 39, 45);
+	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+	BSP_LCD_FillRect(441, 136, 39, 45);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+	BSP_LCD_FillRect(441, 181, 39, 45);
+	BSP_LCD_SetTextColor(LCD_COLOR_ORANGE);
+	BSP_LCD_FillRect(441, 226, 39, 46);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+}
+
 // TODO:
 // Implement this function!
 void socket_client_thread(void const *argument)
@@ -50,64 +67,79 @@ void socket_client_thread(void const *argument)
     server.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     //Connect to remote server
-    if (connect(client_socket, (struct sockaddr*)&server, sizeof(server)) < 0)
-    {
-		LCD_ErrLog("Can't connect to server\n");
-		terminate_thread();
-    }
+    int8_t connect_result = -1;
+	LCD_UsrLog("Waiting for server...\n");
+    do {
+    	connect_result = connect(client_socket, (struct sockaddr*)&server, sizeof(server));
+    	osDelay(500);
+    } while (connect_result < 0);
 	LCD_UsrLog("Connected to server\n");
 
 	// Clear the screen for drawing
-	BSP_LCD_Clear(LCD_COLOR_WHITE);
+//	prepare_screen();
 
+    //Check touch screen and send data
 	TS_StateTypeDef ts_state;
 	uint8_t radius = 3;
+	uint32_t buffer[4] = {0, 0, 0, 0};		// Array elements: {X coordinate, Y coordinate, clear, color}
 
-    //Send some data
-    char x[10];
-    char y[10];
-    char data[30];
     while(1) {
     	BSP_TS_GetState(&ts_state);
-    	if (ts_state.touchDetected && ts_state.touchX[0] > 3 && ts_state.touchX[0] < 477 && ts_state.touchY[0] > 3 && ts_state.touchY[0] < 269) {
-    		BSP_LCD_FillCircle(ts_state.touchX[0], ts_state.touchY[0], radius);
-    		sprintf(x, "%d", ts_state.touchX[0]);
-    		sprintf(y, "%d", ts_state.touchY[0]);
-    		strcpy(data, x);
-    		strcat(data, " ");
-    		strcat(data, y);
-    		strcat(data, " ");
-			if (send(client_socket, data, strlen(data), 0) < 0)
+    	// If color panel is touched
+		if (ts_state.touchDetected && ts_state.touchX[0] > 440) {
+			if (ts_state.touchY[0] < 47) {
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				buffer[3] = LCD_COLOR_BLACK;
+			} else if (ts_state.touchY[0] < 92) {
+				BSP_LCD_SetTextColor(LCD_COLOR_RED);
+				buffer[3] = LCD_COLOR_RED;
+			} else if (ts_state.touchY[0] < 137) {
+				BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+				buffer[3] = LCD_COLOR_GREEN;
+			} else if (ts_state.touchY[0] < 182) {
+				BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+				buffer[3] = LCD_COLOR_YELLOW;
+			} else if (ts_state.touchY[0] < 227) {
+				BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+				buffer[3] = LCD_COLOR_BLUE;
+			} else {
+				BSP_LCD_SetTextColor(LCD_COLOR_ORANGE);
+				buffer[3] = LCD_COLOR_ORANGE;
+			}
+		// If drawing area is touched
+		} else if (ts_state.touchDetected && ts_state.touchX[0] > 3 && ts_state.touchX[0] < 437 && ts_state.touchY[0] > 3 && ts_state.touchY[0] < 269) {
+    		buffer[0] = ts_state.touchX[0];
+    		buffer[1] = ts_state.touchY[0];
+    		BSP_LCD_FillCircle(buffer[0], buffer[1], radius);
+    		//Send data
+			if (send(client_socket, buffer, sizeof(buffer), 0) < 0)
 			{
 				LCD_ErrLog("Send failed\n");
 				terminate_thread();
 			}
-/*			if (send(client_socket, y, strlen(y), 0) < 0)
-			{
-				LCD_ErrLog("Send failed\n");
-				terminate_thread();
-			} */
-			osDelay(5);
-			if (BSP_PB_GetState(BUTTON_KEY) == 1)
-				BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+//			osDelay(3);
     	}
-    	osDelay(5);
- /*
-        //Receive a reply from the server
-        char server_reply[100];
-        int recv_size = recv(client_socket, server_reply, 100, 0);
-        if (recv_size < 0) {
-    		LCD_ErrLog("Receive failed\n");
-    		terminate_thread();
-        }
-        //Add a NULL terminating character to make it a proper string before printing
-        server_reply[recv_size] = '\0';
-        LCD_UsrLog("Reply:\n");
-        LCD_UsrLog("%s\n\n", server_reply);
-*/
+		// If button pushed, clear and send clear
+		if (BSP_PB_GetState(BUTTON_KEY) == 1) {
+			prepare_screen();
+			buffer[2] = 1;
+			if (send(client_socket, buffer, sizeof(buffer), 0) < 0)
+				{
+					LCD_ErrLog("Send failed\n");
+					terminate_thread();
+				}
+			buffer[2] = 0;
+		}
+
+    	osDelay(1);
     }
 
     closesocket(client_socket);
+
+    while (1) {
+      osThreadTerminate(NULL);
+    }
 
 }
 

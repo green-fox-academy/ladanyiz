@@ -37,7 +37,7 @@ int main()
     SOCKADDR_IN server;
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
-    server.sin_addr.S_un.S_addr = INADDR_ANY;
+    server.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the IP address and port to the socket
     if( bind(listening ,(SOCKADDR*)&server , sizeof(server)) == SOCKET_ERROR)

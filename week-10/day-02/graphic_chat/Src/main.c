@@ -100,7 +100,7 @@ int main(void)
   SystemClock_Config(); 
   
   /* Init thread */
-  osThreadDef(Start, StartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
+  osThreadDef(Start, StartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(Start), NULL);
   
   /* Start scheduler */
@@ -139,10 +139,12 @@ static void StartThread(void const * argument)
 
   // TODO:
   // Define and start the server thread
+  osThreadDef(server, socket_server_thread, osPriorityHigh, 0, configMINIMAL_STACK_SIZE * 2);
+  osThreadCreate (osThread(server), &gnetif);
 
   // TODO:
   // Define and start the client thread
-  osThreadDef(client, socket_client_thread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 2);
+  osThreadDef(client, socket_client_thread, osPriorityHigh, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(client), &gnetif);
 
   while (1) {
