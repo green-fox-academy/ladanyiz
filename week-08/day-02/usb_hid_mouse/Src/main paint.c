@@ -50,18 +50,18 @@
 #include <math.h>
 
 /* Private typedef -----------------------------------------------------------*/
-static LCD_DrawPropTypeDef DrawProp[MAX_LAYER_NUMBER];
 /* Private define ------------------------------------------------------------*/
 #define ABS(X)  ((X) > 0 ? (X) : -(X))
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static uint32_t ActiveLayer = 0;
+uint8_t radius = 3;
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 static void CPU_CACHE_Enable(void);
 static void MPU_Config(void);
 static void LCD_Config(void);
+void BSP_LCD_ZDrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -101,46 +101,53 @@ int main(void) {
 
 	TS_StateTypeDef ts_state;
 
-	uint8_t radius = 3;
-
 	uint16_t px = 1000;
 	uint16_t py = 1000;
 	uint16_t x, y;
 
 	while (1) {
 		BSP_TS_GetState(&ts_state);
-		if (ts_state.touchDetected && ts_state.touchX[0] > 441 && ts_state.touchX[0] < 480 && ts_state.touchY[0] > 0 && ts_state.touchY[0] < 39) {
-			BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-			radius = 11;
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 40 && ts_state.touchY[0] < 70) {
-			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			radius = 3;
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 70 && ts_state.touchY[0] < 100) {
-			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			radius = 7;
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 109 && ts_state.touchY[0] < 139) {
-			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			radius = 11;
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 155 && ts_state.touchY[0] < 185) {
-			BSP_LCD_SetTextColor(LCD_COLOR_RED);
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 195 && ts_state.touchY[0] < 225) {
-			BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 446 && ts_state.touchX[0] < 474 && ts_state.touchY[0] > 235 && ts_state.touchY[0] < 265) {
-			BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
-		} else if (ts_state.touchDetected && ts_state.touchX[0] > 13 && ts_state.touchX[0] < 428 && ts_state.touchY[0] > 13 && ts_state.touchY[0] < 259) {
-			if (px == 1000) {
-				px = ts_state.touchX[0];
-				py = ts_state.touchY[0];
-			} else {
-				x = ts_state.touchX[0];
-				y = ts_state.touchY[0];
-				BSP_LCD_ZDrawLine(px, py, x, y);
-				px = x;
-				py = y;
+		if (ts_state.touchDetected) {
+			if (ts_state.touchX[0] > 446) {
+				if (ts_state.touchY[0] < 33) {
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				} else if (ts_state.touchY[0] < 62) {
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					radius = 3;
+				} else if (ts_state.touchY[0] < 94) {
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					radius = 7;
+				} else if (ts_state.touchY[0] < 132) {
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					radius = 11;
+				} else if (ts_state.touchY[0] < 170) {
+					BSP_LCD_SetTextColor(LCD_COLOR_RED);
+				} else if (ts_state.touchY[0] < 204) {
+					BSP_LCD_SetTextColor(LCD_COLOR_DARKGREEN);
+				} else if (ts_state.touchY[0] < 238) {
+					BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+				} else {
+					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+				}
+			} else if (ts_state.touchX[0] > 13 && ts_state.touchX[0] < 428 && ts_state.touchY[0] > 13 && ts_state.touchY[0] < 259) {
+				if (px == 1000) {
+					px = ts_state.touchX[0];
+					py = ts_state.touchY[0];
+				} else {
+					x = ts_state.touchX[0];
+					y = ts_state.touchY[0];
+					BSP_LCD_ZDrawLine(px, py, x, y);
+					px = x;
+					py = y;
+				}
 			}
+		} else {
+			px = 1000;
+			py = 1000;
 		}
-		if (BSP_PB_GetState(BUTTON_KEY) == 1)
+		if (BSP_PB_GetState(BUTTON_KEY) == 1) {
 			LCD_Config();
+		}
 	}
 }
 
@@ -174,20 +181,22 @@ static void LCD_Config(void)
   BSP_LCD_SetTransparency(1, 255);
 
   BSP_LCD_SetTextColor(LCD_COLOR_RED);
-  BSP_LCD_FillCircle(460, 170, 13);
-  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-  BSP_LCD_FillCircle(460, 210, 13);
+  BSP_LCD_FillCircle(463, 152, 11);
+  BSP_LCD_SetTextColor(LCD_COLOR_DARKGREEN);
+  BSP_LCD_FillCircle(463, 186, 11);
   BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
-  BSP_LCD_FillCircle(460, 250, 13);
+  BSP_LCD_FillCircle(463, 220, 11);
+  BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+  BSP_LCD_FillCircle(463, 254, 11);
 
   BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-  BSP_LCD_DrawCircle(460, 18, 11);
-  BSP_LCD_DrawVLine(441, 0, 272);
-  BSP_LCD_DrawHLine(441, 38, 39);
-  BSP_LCD_DrawHLine(441, 146, 39);
-  BSP_LCD_FillCircle(460, 55, 3);
-  BSP_LCD_FillCircle(460, 85, 7);
-  BSP_LCD_FillCircle(460, 124, 11);
+  BSP_LCD_DrawCircle(463, 16, 10);
+  BSP_LCD_DrawVLine(446, 0, 272);
+  BSP_LCD_DrawHLine(446, 33, 36);
+  BSP_LCD_DrawHLine(446, 132, 36);
+  BSP_LCD_FillCircle(463, 49, 3);
+  BSP_LCD_FillCircle(463, 76, 7);
+  BSP_LCD_FillCircle(463, 112, 11);
 
   BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 }
@@ -247,7 +256,7 @@ void BSP_LCD_ZDrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 
   for (curpixel = 0; curpixel <= num_pixels; curpixel++)
   {
-    BSP_LCD_FillCircle(x, y, 3);   /* Draw the current circle */
+    BSP_LCD_FillCircle(x, y, radius);   /* Draw the current circle */
     num += num_add;                            /* Increase the numerator by the top of the fraction */
     if (num >= den)                           /* Check if numerator >= denominator */
     {
@@ -259,6 +268,7 @@ void BSP_LCD_ZDrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
     y += yinc2;                               /* Change the y as appropriate */
   }
 }
+
 
 /**
  * @brief This function provides accurate delay (in milliseconds) based
