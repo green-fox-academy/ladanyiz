@@ -65,6 +65,7 @@ typedef struct {
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t radius = 3;
+uint8_t fill = 0;
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
@@ -72,6 +73,7 @@ static void CPU_CACHE_Enable(void);
 static void MPU_Config(void);
 static void LCD_Config(void);
 void BSP_LCD_ZDrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+void _fill(uint8_t x, uint8_t y, uint32_t old_color);
 
 Screen* ct_screen_init();
 void ct_screen_flip_buffers(Screen *screen);
@@ -200,9 +202,14 @@ int main(void) {
 						radius = 11;
 					} else if (ts_state.touchX[0] < 246) {
 						radius = 14;
+					} else if (ts_state.touchX[0] < 287) {
+						fill = 1 - fill;
 					}
 				}
 			// drawing screen
+			} else if (fill == 1) {
+				_fill(ts_state.touchX[0], ts_state.touchY[0], BSP_LCD_ReadPixel(ts_state.touchX[0], ts_state.touchY[0]));
+				fill = 0;
 			} else if (ts_state.touchX[0] > 13 && ts_state.touchX[0] < 467 && ts_state.touchY[0] > 13 && ts_state.touchY[0] < 259) {
 				if (px == 1000) {
 					px = ts_state.touchX[0];
@@ -333,8 +340,9 @@ static void LCD_Config(void)
 	BSP_LCD_DrawVLine(164, 0, 41);
 	BSP_LCD_DrawVLine(205, 0, 41);
 	BSP_LCD_DrawVLine(246, 0, 41);
+	BSP_LCD_DrawVLine(287, 0, 41);
 
-	BSP_LCD_DrawHLine(0, 41, 480);
+	BSP_LCD_DrawHLine(0, 41, 287);
 
 	BSP_LCD_FillCircle(62, 20, 2);
 	BSP_LCD_FillCircle(103, 20, 5);
@@ -348,6 +356,36 @@ static void LCD_Config(void)
 
 uint32_t ct_screen_backbuffer_id(Screen *screen) {
 	return 1 - screen->front;
+}
+
+
+void _fill(uint8_t x, uint8_t y, uint32_t old_color) {
+
+	uint32_t new_color = BSP_LCD_GetTextColor();
+	BSP_LCD_DrawPixel(x, y, new_color);
+
+	uint8_t i = 0;
+	uint8_t j = 0;
+	for (i = x; BSP_LCD_ReadPixel(i, y - 1) == old_color; i--) {
+		for (j = y - 1; BSP_LCD_ReadPixel(i, j) == old_color; j--) {
+			BSP_LCD_DrawPixel(i, j, new_color);
+		}
+	}
+	for (i = x + 1; BSP_LCD_ReadPixel(i, y) == old_color; i++) {
+		for (j = y; BSP_LCD_ReadPixel(i, j) == old_color; j--) {
+			BSP_LCD_DrawPixel(i, j, new_color);
+		}
+	}
+	for (i = x; BSP_LCD_ReadPixel(i, y + 1) == old_color; i++) {
+		for (j = y + 1; BSP_LCD_ReadPixel(i, j) == old_color; j++) {
+			BSP_LCD_DrawPixel(i, j, new_color);
+		}
+	}
+	for (i = x - 1; BSP_LCD_ReadPixel(i, y) == old_color; i--) {
+		for (j = y; BSP_LCD_ReadPixel(i, j) == old_color; j++) {
+			BSP_LCD_DrawPixel(i, j, new_color);
+		}
+	}
 }
 
 
