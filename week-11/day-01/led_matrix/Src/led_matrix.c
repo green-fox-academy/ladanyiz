@@ -47,6 +47,9 @@ osMutexDef(LED_MATRIX_MUTEX_DEF);
 // Mutex global variable
 osMutexId led_matrix_mutex_id;
 
+osMessageQDef(message_q, 3, uint16_t); // Declare a message queue
+osMessageQId (message_q_id);           // Declare an ID for the message queue
+
 /* Private function prototypes -----------------------------------------------*/
 void led_matrix_set(uint8_t row, uint8_t col, uint8_t state);
 
@@ -164,7 +167,7 @@ void led_matrix_update_thread(void const *argument)
 
 			// Step 6:
 			// Delay
-			osDelay(100);
+			osDelay(5);
 
 			// Step 7:
 			// Turn off the column or row
@@ -186,10 +189,26 @@ void led_matrix_waterfall_thread(void const *argument)
 		for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
 			for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
 				led_matrix_set(r, c, 1);
-				osDelay(100);
+				osEvent event = osMessageGet(message_q_id, osWaitForever);
+				osDelay(event.value.v);
 				led_matrix_set(r, c, 0);
 			}
 		}
+	}
+
+	while (1) {
+		LCD_ErrLog("led_matrix_waterfall - terminating...\n");
+		osThreadTerminate(NULL);
+	}
+}
+
+// ADC thread, writing into the message queue
+void adc_thread(void const *argument)
+{
+	message_q_id = osMessageCreate(osMessageQ(message_q), NULL);
+	while (1) {
+		LCD_UsrLog("%u\n", adc_measure());
+		osMessagePut(message_q_id, adc_measure(), osWaitForever);
 	}
 
 	while (1) {
