@@ -59,15 +59,10 @@
 #include "stm32f7xx_hal_adc.h"
 
 /* Private typedef -----------------------------------------------------------*/
-GPIO_InitTypeDef GPIO_InitDef;
-
 /* Private define ------------------------------------------------------------*/
-ADC_HandleTypeDef adc_handle;
-
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 struct netif gnetif; /* network interface structure */
-ADC_ChannelConfTypeDef adc_ch_conf;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -77,9 +72,6 @@ static void Netif_Config(void);
 static void MPU_Config(void);
 static void Error_Handler(void);
 static void CPU_CACHE_Enable(void);
-void HAL_ADC_MspInit(ADC_HandleTypeDef *adc_handle);
-static void adc_init();
-uint16_t adc_measure();
 static void LCD_Config(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -107,10 +99,6 @@ int main(void)
 
 	/* Configure the system clock to 200 MHz */
 	SystemClock_Config();
-
-	HAL_ADC_MspInit(&adc_handle);
-
-	adc_init();
 
 	/* Init thread */
 	osThreadDef(Start, StartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
@@ -161,70 +149,10 @@ static void StartThread(void const * argument)
 	osThreadDef(LED_MATRIX_WATERFALL, led_matrix_waterfall_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
 	osThreadCreate (osThread(LED_MATRIX_WATERFALL), NULL);
 
-	// Start ADC thread
-//	osThreadDef(ADC, adc_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
-//	osThreadCreate (osThread(ADC), NULL);
-
 	while (1) {
 	/* Delete the Init Thread */
 	osThreadTerminate(NULL);
 	}
-}
-
-
-/**
-  * @brief  Initializes ADC3 to measure voltage on CH0
-  * @param  None
-  * @retval None
-  */
-static void adc_init()
-{
-	adc_handle.State = HAL_ADC_STATE_RESET;
-	adc_handle.Instance = ADC3;
-	adc_handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
-	adc_handle.Init.Resolution = ADC_RESOLUTION_12B;
-	adc_handle.Init.EOCSelection = ADC_EOC_SEQ_CONV;
-	adc_handle.Init.DMAContinuousRequests = DISABLE;
-	adc_handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-	adc_handle.Init.ContinuousConvMode = DISABLE;
-	adc_handle.Init.DiscontinuousConvMode = DISABLE;
-	adc_handle.Init.ScanConvMode = DISABLE;
-	HAL_ADC_Init(&adc_handle);
-
-	adc_ch_conf.Channel = ADC_CHANNEL_0;
-	adc_ch_conf.Offset = 0;
-	adc_ch_conf.Rank = 1;
-	adc_ch_conf.SamplingTime = ADC_SAMPLETIME_480CYCLES;
-	HAL_ADC_ConfigChannel(&adc_handle, &adc_ch_conf);
-}
-
-
-/**
-  * @brief  Measures the voltage with ADC3 on CH0
-  * @param  None
-  * @retval Measured value (0-4095) / 4
-  */
-uint16_t adc_measure()
-{
-	HAL_ADC_Start(&adc_handle);
-	HAL_ADC_PollForConversion(&adc_handle, HAL_MAX_DELAY);
-	return HAL_ADC_GetValue(&adc_handle) / 4;
-}
-
-
-void HAL_ADC_MspInit(ADC_HandleTypeDef *adc_handle)
-{
-	__HAL_RCC_ADC3_CLK_ENABLE();
-
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-
-	GPIO_InitTypeDef gpio_init;
-
-	gpio_init.Pin = GPIO_PIN_0;
-	gpio_init.Mode = GPIO_MODE_ANALOG;
-	gpio_init.Pull = GPIO_NOPULL;
-
-	HAL_GPIO_Init(GPIOA, &gpio_init);
 }
 
 

@@ -16,12 +16,7 @@ TS_StateTypeDef ts_state;
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-GPIO_InitTypeDef GPIO_InitDef_a;
-GPIO_InitTypeDef GPIO_InitDef_b;
-GPIO_InitTypeDef GPIO_InitDef_c;
-GPIO_InitTypeDef GPIO_InitDef_g;
-GPIO_InitTypeDef GPIO_InitDef_h;
-GPIO_InitTypeDef GPIO_InitDef_i;		// Structures for the six GPIO modules that control our pins
+GPIO_InitTypeDef GPIO_InitDef;		// Structure with initializing info for the GPIO ports
 
 // Each LED state is stored in this 2D array
 GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS];
@@ -96,52 +91,32 @@ void led_matrix_update_thread(void const *argument)
 	__HAL_RCC_GPIOI_CLK_ENABLE();
 
 	// Initialize the GPIO modules
-	GPIO_InitDef_a.Pin = GPIO_PIN_8 | GPIO_PIN_15;
-	GPIO_InitDef_a.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_a.Pull = GPIO_NOPULL;
-	GPIO_InitDef_a.Speed = GPIO_SPEED_MEDIUM;
+	// These three settings are commmon for all the six ports
+	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitDef.Pull = GPIO_NOPULL;
+	GPIO_InitDef.Speed = GPIO_SPEED_MEDIUM;
 
-	GPIO_InitDef_b.Pin = GPIO_PIN_4 | GPIO_PIN_9;
-	GPIO_InitDef_b.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_b.Pull = GPIO_NOPULL;
-	GPIO_InitDef_b.Speed = GPIO_SPEED_MEDIUM;
+	// Set the pins for the given port, then initialize it. Repeat for all six ports.
+	GPIO_InitDef.Pin = GPIO_PIN_8 | GPIO_PIN_15;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitDef);
 
-	GPIO_InitDef_c.Pin = GPIO_PIN_6;
-	GPIO_InitDef_c.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_c.Pull = GPIO_NOPULL;
-	GPIO_InitDef_c.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_4 | GPIO_PIN_9;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitDef);
 
-	GPIO_InitDef_g.Pin = GPIO_PIN_6 | GPIO_PIN_7;
-	GPIO_InitDef_g.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_g.Pull = GPIO_NOPULL;
-	GPIO_InitDef_g.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitDef);
 
-	GPIO_InitDef_h.Pin = GPIO_PIN_6;
-	GPIO_InitDef_h.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_h.Pull = GPIO_NOPULL;
-	GPIO_InitDef_h.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+	HAL_GPIO_Init(GPIOG, &GPIO_InitDef);
 
-	GPIO_InitDef_i.Pin = GPIO_PIN_0 | GPIO_PIN_1 |GPIO_PIN_2 |GPIO_PIN_3;
-	GPIO_InitDef_i.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_i.Pull = GPIO_NOPULL;
-	GPIO_InitDef_i.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6;
+	HAL_GPIO_Init(GPIOH, &GPIO_InitDef);
 
-	HAL_GPIO_Init(GPIOA, &GPIO_InitDef_a);
-	HAL_GPIO_Init(GPIOB, &GPIO_InitDef_b);
-	HAL_GPIO_Init(GPIOC, &GPIO_InitDef_c);
-	HAL_GPIO_Init(GPIOG, &GPIO_InitDef_g);
-	HAL_GPIO_Init(GPIOH, &GPIO_InitDef_h);
-	HAL_GPIO_Init(GPIOI, &GPIO_InitDef_i);
+	GPIO_InitDef.Pin = GPIO_PIN_0 | GPIO_PIN_1 |GPIO_PIN_2 |GPIO_PIN_3;
+	HAL_GPIO_Init(GPIOI, &GPIO_InitDef);
 
 	// Initialize the LED matrix state table
-/*	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
-		for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
-			led_matrix_state[r][c] = 0;
-		}
-	}
-*/
 	led_matrix_clear();
-
 	// TODO:
 	// Create a mutex
 	// Use the LED_MATRIX_MUTEX_DEF
@@ -192,195 +167,22 @@ void led_matrix_update_thread(void const *argument)
 	}
 }
 
-// This thread is a waterfall type animation
+// This thread was a waterfall type animation originally, now it fills the led_matrix_state table based on where the screen is touched
 void led_matrix_waterfall_thread(void const *argument)
 {
 	uint8_t x = 7;
 	uint8_t y = 5;
 	uint8_t d = 54;
 	while (1) {
-/*		for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
-			for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
-				led_matrix_set(r, c, 1);
-				osEvent event = osMessageGet(message_q_id, osWaitForever);
-				osDelay(event.value.v);
-				led_matrix_set(r, c, 0);
-			}
-		}
-*/
 		BSP_TS_GetState(&ts_state);
 		if (ts_state.touchDetected) {
 			if (ts_state.touchX[0] < 380) {
-				if (ts_state.touchX[0] < d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 6;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else if (ts_state.touchX[0] < 2 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 5;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else if (ts_state.touchX[0] < 3 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 4;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else if (ts_state.touchX[0] < 4 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 3;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else if (ts_state.touchX[0] < 5 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 2;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else if (ts_state.touchX[0] < 6 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 1;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				} else {
-					led_matrix_set(x, y, 0);
-					x = 0;
-					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
-					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
-					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
-					}
-				}
+				led_matrix_set(x, y, 0);
+				x = 6 - ts_state.touchX[0] / d;
+				y = ts_state.touchY[0] / d;
+				led_matrix_set(x, y, 1);
 			}
-		} else if (x != 500) {
+		} else if (x != 7) {
 			led_matrix_set(x, y, 0);
 		}
 	}
@@ -390,21 +192,5 @@ void led_matrix_waterfall_thread(void const *argument)
 		osThreadTerminate(NULL);
 	}
 }
-
-// ADC thread, writing into the message queue
-void adc_thread(void const *argument)
-{
-	message_q_id = osMessageCreate(osMessageQ(message_q), NULL);
-	while (1) {
-//		LCD_UsrLog("%u\n", adc_measure());
-		osMessagePut(message_q_id, adc_measure(), osWaitForever);
-	}
-
-	while (1) {
-		LCD_ErrLog("led_matrix_waterfall - terminating...\n");
-		osThreadTerminate(NULL);
-	}
-}
-
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

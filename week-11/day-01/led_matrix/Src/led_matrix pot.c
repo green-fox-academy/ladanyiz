@@ -4,24 +4,17 @@
 #include "stm32f7xx_hal.h"
 #include "lcd_log.h"
 #include "cmsis_os.h"
-#include "stm32746g_discovery_ts.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct {
 	GPIO_TypeDef* GPIOx;
 	uint16_t pin_no;
 }cell_t;					// A structure that stores one LED (actually a pin)
-TS_StateTypeDef ts_state;
 
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-GPIO_InitTypeDef GPIO_InitDef_a;
-GPIO_InitTypeDef GPIO_InitDef_b;
-GPIO_InitTypeDef GPIO_InitDef_c;
-GPIO_InitTypeDef GPIO_InitDef_g;
-GPIO_InitTypeDef GPIO_InitDef_h;
-GPIO_InitTypeDef GPIO_InitDef_i;		// Structures for the six GPIO modules that control our pins
+GPIO_InitTypeDef GPIO_InitDef;		// Structure with initializing info for the GPIO ports
 
 // Each LED state is stored in this 2D array
 GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS];
@@ -76,6 +69,7 @@ void led_matrix_set(uint8_t row, uint8_t col, uint8_t state) {
 	osMutexRelease(led_matrix_mutex_id);
 }
 
+// Set all the elements of the 2D array to zero by zeroing the corresponding memory area
 void led_matrix_clear() {
 	memset(led_matrix_state, 0, sizeof(led_matrix_state[0][0]) * 7 * 5);
 }
@@ -87,7 +81,7 @@ void led_matrix_update_thread(void const *argument)
 	// TODO:
 	// Initialize the pins as outputs and the led_matrix_state 2D array
 
-	// Enable the clocks of the GPIO modules
+	// Enable the clocks of the six GPIO ports that control our pins
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -96,50 +90,31 @@ void led_matrix_update_thread(void const *argument)
 	__HAL_RCC_GPIOI_CLK_ENABLE();
 
 	// Initialize the GPIO modules
-	GPIO_InitDef_a.Pin = GPIO_PIN_8 | GPIO_PIN_15;
-	GPIO_InitDef_a.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_a.Pull = GPIO_NOPULL;
-	GPIO_InitDef_a.Speed = GPIO_SPEED_MEDIUM;
+	// These three settings are commmon for all the six ports
+	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitDef.Pull = GPIO_NOPULL;
+	GPIO_InitDef.Speed = GPIO_SPEED_MEDIUM;
 
-	GPIO_InitDef_b.Pin = GPIO_PIN_4 | GPIO_PIN_9;
-	GPIO_InitDef_b.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_b.Pull = GPIO_NOPULL;
-	GPIO_InitDef_b.Speed = GPIO_SPEED_MEDIUM;
+	// Set the pins for the given port, then initialize it. Repeat for all six ports.
+	GPIO_InitDef.Pin = GPIO_PIN_8 | GPIO_PIN_15;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitDef);
 
-	GPIO_InitDef_c.Pin = GPIO_PIN_6;
-	GPIO_InitDef_c.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_c.Pull = GPIO_NOPULL;
-	GPIO_InitDef_c.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_4 | GPIO_PIN_9;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitDef);
 
-	GPIO_InitDef_g.Pin = GPIO_PIN_6 | GPIO_PIN_7;
-	GPIO_InitDef_g.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_g.Pull = GPIO_NOPULL;
-	GPIO_InitDef_g.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitDef);
 
-	GPIO_InitDef_h.Pin = GPIO_PIN_6;
-	GPIO_InitDef_h.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_h.Pull = GPIO_NOPULL;
-	GPIO_InitDef_h.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+	HAL_GPIO_Init(GPIOG, &GPIO_InitDef);
 
-	GPIO_InitDef_i.Pin = GPIO_PIN_0 | GPIO_PIN_1 |GPIO_PIN_2 |GPIO_PIN_3;
-	GPIO_InitDef_i.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef_i.Pull = GPIO_NOPULL;
-	GPIO_InitDef_i.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitDef.Pin = GPIO_PIN_6;
+	HAL_GPIO_Init(GPIOH, &GPIO_InitDef);
 
-	HAL_GPIO_Init(GPIOA, &GPIO_InitDef_a);
-	HAL_GPIO_Init(GPIOB, &GPIO_InitDef_b);
-	HAL_GPIO_Init(GPIOC, &GPIO_InitDef_c);
-	HAL_GPIO_Init(GPIOG, &GPIO_InitDef_g);
-	HAL_GPIO_Init(GPIOH, &GPIO_InitDef_h);
-	HAL_GPIO_Init(GPIOI, &GPIO_InitDef_i);
+	GPIO_InitDef.Pin = GPIO_PIN_0 | GPIO_PIN_1 |GPIO_PIN_2 |GPIO_PIN_3;
+	HAL_GPIO_Init(GPIOI, &GPIO_InitDef);
 
 	// Initialize the LED matrix state table
-/*	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
-		for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
-			led_matrix_state[r][c] = 0;
-		}
-	}
-*/
 	led_matrix_clear();
 
 	// TODO:
@@ -192,12 +167,12 @@ void led_matrix_update_thread(void const *argument)
 	}
 }
 
-// This thread is a waterfall type animation
+// This thread is a waterfall type animation, it writes into the led_matrix_state table which in turn is read by the led_matrix_update_thread
 void led_matrix_waterfall_thread(void const *argument)
 {
 	while (1) {
-		for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
-			for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
+		for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
+			for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
 				led_matrix_set(r, c, 1);
 				osEvent event = osMessageGet(message_q_id, osWaitForever);
 				osDelay(event.value.v);
@@ -226,6 +201,5 @@ void adc_thread(void const *argument)
 		osThreadTerminate(NULL);
 	}
 }
-
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
