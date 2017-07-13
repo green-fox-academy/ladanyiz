@@ -60,6 +60,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 GPIO_InitTypeDef GPIO_InitDef;
+
 /* Private define ------------------------------------------------------------*/
 ADC_HandleTypeDef adc_handle;
 
@@ -79,6 +80,7 @@ static void CPU_CACHE_Enable(void);
 void HAL_ADC_MspInit(ADC_HandleTypeDef *adc_handle);
 static void adc_init();
 uint16_t adc_measure();
+static void LCD_Config(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -89,38 +91,38 @@ uint16_t adc_measure();
   */
 int main(void)
 {
-  /* Configure the MPU attributes as Device memory for ETH DMA descriptors */
-  MPU_Config();
+	/* Configure the MPU attributes as Device memory for ETH DMA descriptors */
+	MPU_Config();
 
-  /* Enable the CPU Cache */
-  CPU_CACHE_Enable();
+	/* Enable the CPU Cache */
+	CPU_CACHE_Enable();
 
-  /* STM32F7xx HAL library initialization:
-       - Configure the Flash ART accelerator on ITCM interface
-       - Configure the Systick to generate an interrupt each 1 msec
-       - Set NVIC Group Priority to 4
-       - Global MSP (MCU Support Package) initialization
-     */
-  HAL_Init();  
-  
-  /* Configure the system clock to 200 MHz */
-  SystemClock_Config();
+	/* STM32F7xx HAL library initialization:
+	   - Configure the Flash ART accelerator on ITCM interface
+	   - Configure the Systick to generate an interrupt each 1 msec
+	   - Set NVIC Group Priority to 4
+	   - Global MSP (MCU Support Package) initialization
+	 */
+	HAL_Init();
 
-  HAL_ADC_MspInit(&adc_handle);
+	/* Configure the system clock to 200 MHz */
+	SystemClock_Config();
 
-  adc_init();
-  
-  /* Init thread */
-  osThreadDef(Start, StartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
-  osThreadCreate (osThread(Start), NULL);
-  
-  /* Start scheduler */
-  osKernelStart();
-  
-  /* We should never get here as control is now taken by the scheduler */
-  while(1) {
+	HAL_ADC_MspInit(&adc_handle);
 
-  }
+	adc_init();
+
+	/* Init thread */
+	osThreadDef(Start, StartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
+	osThreadCreate (osThread(Start), NULL);
+
+	/* Start scheduler */
+	osKernelStart();
+
+	/* We should never get here as control is now taken by the scheduler */
+	while(1) {
+
+	}
 }
 
 
@@ -131,38 +133,42 @@ int main(void)
   */
 static void StartThread(void const * argument)
 { 
-  /* Initialize LCD */
-  BSP_Config();
-  
-  /* Create tcp_ip stack thread */
-  tcpip_init(NULL, NULL);
-  
-  /* Initialize the LwIP stack */
-  Netif_Config();
+	/* Initialize LCD */
+	BSP_Config();
 
-  /* Notify user about the network interface config */
-  User_notification(&gnetif);
-  
-  /* Start DHCPClient */
-  osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
-  osThreadCreate (osThread(DHCP), &gnetif);
+//	LCD_Config();
 
-  // Start led matrix updater thread
-  osThreadDef(LED_MATRIX_UPDATE, led_matrix_update_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
-  osThreadCreate (osThread(LED_MATRIX_UPDATE), NULL);
+	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
 
-  // Start waterfall thread
-  osThreadDef(LED_MATRIX_WATERFALL, led_matrix_waterfall_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
-  osThreadCreate (osThread(LED_MATRIX_WATERFALL), NULL);
+	/* Create tcp_ip stack thread */
+	tcpip_init(NULL, NULL);
 
-  // Start ADC thread
-  osThreadDef(ADC, adc_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
-  osThreadCreate (osThread(ADC), NULL);
+	/* Initialize the LwIP stack */
+	Netif_Config();
 
-  while (1) {
-    /* Delete the Init Thread */ 
-    osThreadTerminate(NULL);
-  }
+	/* Notify user about the network interface config */
+	User_notification(&gnetif);
+
+	/* Start DHCPClient */
+	osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
+	osThreadCreate (osThread(DHCP), &gnetif);
+
+	// Start led matrix updater thread
+	osThreadDef(LED_MATRIX_UPDATE, led_matrix_update_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
+	osThreadCreate (osThread(LED_MATRIX_UPDATE), NULL);
+
+	// Start waterfall thread
+	osThreadDef(LED_MATRIX_WATERFALL, led_matrix_waterfall_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
+	osThreadCreate (osThread(LED_MATRIX_WATERFALL), NULL);
+
+	// Start ADC thread
+	osThreadDef(ADC, adc_thread, osPriorityLow, 0, configMINIMAL_STACK_SIZE * 2);
+	osThreadCreate (osThread(ADC), NULL);
+
+	while (1) {
+	/* Delete the Init Thread */
+	osThreadTerminate(NULL);
+	}
 }
 
 
@@ -219,6 +225,32 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *adc_handle)
 	gpio_init.Pull = GPIO_NOPULL;
 
 	HAL_GPIO_Init(GPIOA, &gpio_init);
+}
+
+
+static void LCD_Config(void)
+{
+	/* Select the LCD Foreground Layer  */
+//	BSP_LCD_SelectLayer(1);
+
+	/* Clear the Foreground Layer */
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+	/* Configure the transparency for foreground and background :
+	 Increase the transparency */
+//	BSP_LCD_SetTransparency(0, 0);
+//	BSP_LCD_SetTransparency(1, 255);
+
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+
+	BSP_LCD_FillRect(1, 1, 378, 270);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	uint8_t d = 54;
+	for (uint8_t x = 0; x < 7; x++) {
+		for (uint8_t y = 0; y < 5; y++) {
+			BSP_LCD_FillCircle((d / 2) + (x * d), (d / 2) + (y * d), 18);
+		}
+	}
 }
 
 

@@ -1,4 +1,5 @@
 /* Includes ------------------------------------------------------------------*/
+#include <string.h>
 #include "led_matrix.h"
 #include "stm32f7xx_hal.h"
 #include "lcd_log.h"
@@ -76,15 +77,7 @@ void led_matrix_set(uint8_t row, uint8_t col, uint8_t state) {
 }
 
 void led_matrix_clear() {
-	GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0}
-	};
+	memset(led_matrix_state, 0, sizeof(led_matrix_state[0][0]) * 7 * 5);
 }
 
 // TODO:
@@ -141,11 +134,13 @@ void led_matrix_update_thread(void const *argument)
 	HAL_GPIO_Init(GPIOI, &GPIO_InitDef_i);
 
 	// Initialize the LED matrix state table
-	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
+/*	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
 		for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
 			led_matrix_state[r][c] = 0;
 		}
 	}
+*/
+	led_matrix_clear();
 
 	// TODO:
 	// Create a mutex
@@ -200,8 +195,8 @@ void led_matrix_update_thread(void const *argument)
 // This thread is a waterfall type animation
 void led_matrix_waterfall_thread(void const *argument)
 {
-	uint8_t x = 7;
-	uint8_t y = 5;
+//	uint8_t x = 7;
+//	uint8_t y = 5;
 	uint8_t d = 54;
 	while (1) {
 /*		for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
@@ -392,11 +387,11 @@ void led_matrix_waterfall_thread(void const *argument)
 */
 		BSP_TS_GetState(&ts_state);
 		if (ts_state.touchDetected) {
-			if (ts_state.touchX[0] < 380) {
+			if (ts_state.touchX[0] < 8 * d + 2) {
 				if (ts_state.touchX[0] < d + 2) {
 					if (ts_state.touchY[0] < d + 2) {
 						led_matrix_clear();
-						GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
 							{0, 1, 1, 1, 0},
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
@@ -405,9 +400,10 @@ void led_matrix_waterfall_thread(void const *argument)
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1}
 						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
 						led_matrix_clear();
-						GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
@@ -416,9 +412,10 @@ void led_matrix_waterfall_thread(void const *argument)
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1}
 						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
 						led_matrix_clear();
-						GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
 							{0, 1, 1, 1, 0},
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
@@ -427,9 +424,10 @@ void led_matrix_waterfall_thread(void const *argument)
 							{1, 0, 0, 0, 1},
 							{0, 1, 1, 1, 0}
 						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
 						led_matrix_clear();
-						GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
 							{1, 0, 0, 0, 1},
@@ -438,9 +436,10 @@ void led_matrix_waterfall_thread(void const *argument)
 							{0, 1, 0, 1, 0},
 							{0, 0, 1, 0, 0}
 						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
 						led_matrix_clear();
-						GPIO_PinState led_matrix_state[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
 							{0, 1, 1, 1, 0},
 							{1, 0, 0, 0, 1},
 							{0, 0, 0, 1, 0},
@@ -449,150 +448,393 @@ void led_matrix_waterfall_thread(void const *argument)
 							{1, 0, 0, 0, 0},
 							{1, 1, 1, 1, 1}
 						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				} else if (ts_state.touchX[0] < 2 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 5;
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 1, 0, 1},
+							{1, 0, 1, 0, 1},
+							{0, 1, 0, 1, 0},
+							{0, 1, 0, 1, 0},
+							{0, 1, 0, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 1, 1, 0},
+							{0, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				} else if (ts_state.touchX[0] < 3 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 4;
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 1, 1},
+							{0, 1, 1, 1, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 0, 1, 0},
+							{0, 0, 1, 0, 0},
+							{0, 1, 0, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 0, 0, 1, 0},
+							{0, 0, 1, 1, 0},
+							{0, 1, 0, 1, 0},
+							{1, 1, 1, 1, 1},
+							{0, 0, 0, 1, 0},
+							{0, 0, 0, 1, 0},
+							{0, 0, 0, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				} else if (ts_state.touchX[0] < 4 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 3;
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 1, 0},
+							{1, 0, 1, 0, 0},
+							{1, 1, 0, 0, 0},
+							{1, 0, 1, 0, 0},
+							{1, 0, 0, 1, 0},
+							{1, 0, 0, 0, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 1, 1, 0},
+							{1, 0, 1, 0, 0},
+							{1, 0, 0, 1, 0},
+							{1, 0, 0, 0, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 0, 1, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 0},
+							{0, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				} else if (ts_state.touchX[0] < 5 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 2;
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 0},
+							{0, 1, 1, 1, 0},
+							{0, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 0, 1, 0},
+							{0, 0, 1, 0, 0},
+							{0, 1, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				} else if (ts_state.touchX[0] < 6 * d + 2) {
-					led_matrix_set(x, y, 0);
-					x = 1;
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 1, 1, 1, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 1, 0, 1, 1},
+							{1, 0, 1, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 1, 0, 0, 1},
+							{1, 0, 1, 0, 1},
+							{1, 0, 0, 1, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 1, 1, 1, 1},
+							{0, 0, 0, 0, 1},
+							{0, 0, 0, 1, 0},
+							{0, 0, 1, 0, 0},
+							{0, 1, 0, 0, 0},
+							{1, 0, 0, 0, 0},
+							{1, 0, 0, 0, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
-				} else {
-					led_matrix_set(x, y, 0);
-					x = 0;
+				} else if (ts_state.touchX[0] < 7 * d + 2) {
 					if (ts_state.touchY[0] < d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 0;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 0},
+							{1, 0, 1, 1, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 2 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 1;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 1, 0, 0, 1},
+							{1, 0, 1, 0, 1},
+							{1, 0, 0, 1, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 3 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 2;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else if (ts_state.touchY[0] < 4 * d + 2) {
-						led_matrix_set(x, y, 0);
-						y = 3;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 0, 1, 0, 0},
+							{0, 1, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 0, 1, 0, 0},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					} else {
-						led_matrix_set(x, y, 0);
-						y = 4;
-						led_matrix_set(x, y, 1);
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
+					}
+				} else if (ts_state.touchX[0] < 8 * d + 2) {
+					if (ts_state.touchY[0] < 5 * d + 2) {
+						led_matrix_clear();
+						GPIO_PinState temp_matrix[LED_MATRIX_ROWS][LED_MATRIX_COLS] = {
+							{0, 1, 1, 1, 0},
+							{1, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 1},
+							{0, 0, 0, 0, 1},
+							{1, 0, 0, 0, 1},
+							{0, 1, 1, 1, 0}
+						};
+						memcpy(led_matrix_state, temp_matrix, sizeof(led_matrix_state[0][0]) * LED_MATRIX_ROWS * LED_MATRIX_COLS);
 					}
 				}
 			}

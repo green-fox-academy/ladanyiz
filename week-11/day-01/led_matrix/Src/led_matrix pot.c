@@ -1,14 +1,17 @@
 /* Includes ------------------------------------------------------------------*/
+#include <string.h>
 #include "led_matrix.h"
 #include "stm32f7xx_hal.h"
 #include "lcd_log.h"
 #include "cmsis_os.h"
+#include "stm32746g_discovery_ts.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct {
 	GPIO_TypeDef* GPIOx;
 	uint16_t pin_no;
 }cell_t;					// A structure that stores one LED (actually a pin)
+TS_StateTypeDef ts_state;
 
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -47,11 +50,12 @@ osMutexDef(LED_MATRIX_MUTEX_DEF);
 // Mutex global variable
 osMutexId led_matrix_mutex_id;
 
-osMessageQDef(message_q, 3, uint16_t); // Declare a message queue
+osMessageQDef(message_q, 1, uint16_t); // Declare a message queue
 osMessageQId (message_q_id);           // Declare an ID for the message queue
 
 /* Private function prototypes -----------------------------------------------*/
 void led_matrix_set(uint8_t row, uint8_t col, uint8_t state);
+void led_matrix_clear();
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -70,6 +74,10 @@ void led_matrix_set(uint8_t row, uint8_t col, uint8_t state) {
 	// TODO:
 	// Release the mutex
 	osMutexRelease(led_matrix_mutex_id);
+}
+
+void led_matrix_clear() {
+	memset(led_matrix_state, 0, sizeof(led_matrix_state[0][0]) * 7 * 5);
 }
 
 // TODO:
@@ -126,11 +134,13 @@ void led_matrix_update_thread(void const *argument)
 	HAL_GPIO_Init(GPIOI, &GPIO_InitDef_i);
 
 	// Initialize the LED matrix state table
-	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
+/*	for (uint8_t r = 0; r < LED_MATRIX_ROWS; r++) {
 		for (uint8_t c = 0; c < LED_MATRIX_COLS; c++) {
 			led_matrix_state[r][c] = 0;
 		}
 	}
+*/
+	led_matrix_clear();
 
 	// TODO:
 	// Create a mutex
@@ -207,7 +217,7 @@ void adc_thread(void const *argument)
 {
 	message_q_id = osMessageCreate(osMessageQ(message_q), NULL);
 	while (1) {
-		LCD_UsrLog("%u\n", adc_measure());
+//		LCD_UsrLog("%u\n", adc_measure());
 		osMessagePut(message_q_id, adc_measure(), osWaitForever);
 	}
 
